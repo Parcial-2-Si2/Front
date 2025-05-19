@@ -1,1 +1,96 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --primary-color: #343EC1;
+  --secondary-color: #1A3A78;
+  --tertiary-color: #5A67BA;
+  --background-color: #F5F2F2;
+  --text-color-1: #1B1B1B;
+  --text-color-2: #747474;
+  --text-color-3: #575F6E;
+  --text-color-4: #E2E4E5;
+  --text-color-5: #AFAFAF;
+  --text-color-6: #D0D0D0;
+  --text-color-7: #B6B6B7;
+  --text-color-8: #170F49;
+  --text-label: #242426;
+  --text-title: #242731;
+  --text-input: #575F6E;
+}
+
+h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+}
+
+
+/* Aplica un color de fondo y color de texto al encabezado */
+.table thead th {
+  background-color: #516178;
+  color: #fff;
+  font-weight: bold;
+  text-align: center !important;
+}
+
+/* Cambia el color de fondo cuando haces hover en las filas */
+.table tbody tr:hover {
+  background-color: #edf4fe !important;
+  --bs-table-hover-bg: #edf4fe !important;
+}
+
+/* Aplica bordes a toda la tabla */
+.table,
+.table th,
+.table td {
+  border: 1px solid #d5e4fb; /* Color de borde, ajusta si es necesario */
+}
+
+/* Opcional: añade padding para una mejor apariencia */
+.table th,
+.table td {
+  padding: 8px 10px;
+}
+
+
+.modal {
+  display: block;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+
+/* Datatable */
+button.dt-paging-button.first,  button.dt-paging-button.last {
+  display: none !important;
+}
+
+table.dataTable thead th, table.dataTable tbody th {
+  text-align: center !important; 
+}
+
+table.dataTable th.dt-type-numeric, table.dataTable th.dt-type-date, table.dataTable td.dt-type-numeric, table.dataTable td.dt-type-date {
+  text-align: center !important; 
+}
+
+
+/* Logo Style */
+.logo-text {
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
+  font-weight: bold;
+  font-style: italic;
+  font-size: 40px;
+  color: #3a3aff; /* Naranja */
+}
+
+.logo-ia {
+  color: #4b97ed; /* Azul intenso */
+}
+

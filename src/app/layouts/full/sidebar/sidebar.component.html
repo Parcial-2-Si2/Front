@@ -1,0 +1,39 @@
+<aside id="sidebar" class="sidebar">
+  <ul class="sidebar-nav" id="sidebar-nav">
+    <li
+      *ngFor="let item of menuItems; let i = index"
+      class="nav-item"
+      [ngClass]="{ 'has-children': item.children }"
+    >
+      <a
+        class="nav-link collapsed"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: i == 0 }"
+        [attr.aria-expanded]="item.children ? 'false' : null"
+        (click)="toggleCollapse(item)"
+      >
+        <i [class]="item.icon"></i>
+        <span>{{ item.label }}</span>
+        <i *ngIf="item.children" class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul
+        *ngIf="item.children"
+        class="nav-content collapse"
+        [ngClass]="{ show: item.isExpanded }"
+        data-bs-parent="#sidebar-nav"
+      >
+        <li *ngFor="let subItem of item.children">
+          <a
+            [routerLink]="subItem.route"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: false }"
+          >
+            <i class="bi bi-circle"></i>
+            <span>{{ subItem.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</aside>
