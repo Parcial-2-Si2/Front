@@ -1,0 +1,87 @@
+<div class="pagetitle">
+  <h1>Asignación de Materias</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Inicio</a></li>
+      <li class="breadcrumb-item active">Detalle del Docente</li>
+    </ol>
+  </nav>
+</div>
+
+<div class="col-12">
+  <div class="card overflow-auto">
+    <div class="card-body p-5">
+
+      <!-- Encabezado con info del docente -->
+      <div class="mb-4">
+        <h4 class="fw-bold mb-3"><i class="bi bi-person-circle"></i>&nbsp; Información del Docente</h4>
+        <div class="row">
+          <div class="col-md-4">
+            <label><strong>CI del Docente:</strong></label>
+            <p>{{ docenteCI }}</p>
+          </div>
+          <div class="col-md-4">
+            <label><strong>Nombre Completo:</strong></label>
+            <p>{{ docenteSeleccionado }}</p>
+          </div>
+          <div class="col-md-4">
+            <label><strong>Correo:</strong></label>
+            <p>{{ docenteSeleccionado}}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón para regresar -->
+      <div class="mb-4">
+        <button class="btn btn-secondary" (click)="regresar()">
+          <i class="bi bi-arrow-left"></i> Regresar
+        </button>
+      </div>
+
+      <!-- Sección de asignación de materias -->
+      <div class="row align-items-end mb-4">
+        <div class="col-md-8">
+          <label for="materiaSelect" class="form-label">Asignar nueva materia</label>
+          <select class="form-select" id="materiaSelect" [(ngModel)]="materiaSeleccionadaId">
+            <option [ngValue]="null" disabled>Seleccione una materia</option>
+            <option *ngFor="let materia of todasLasMaterias" [value]="materia.id">
+              {{ materia.nombre }}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-primary w-100" (click)="asignarMateria()">
+            <i class="bi bi-plus-circle"></i> Asignar Materia
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabla de materias asignadas -->
+      <h5 class="fw-bold mb-3"><i class="bi bi-journal-text"></i>&nbsp; Materias Asignadas</h5>
+      <table class="table table-striped">
+        <thead class="text-center">
+          <tr>
+            <th>#</th>
+            <th>Materia</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let asignacion of materiasAsignadas; let i = index">
+            <td class="text-center">{{ i + 1 }}</td>
+            <td class="text-center">{{ asignacion.materia }}</td>
+            <td class="text-center">
+              <button class="btn btn-danger btn-sm" (click)="eliminarAsignacion(i)">
+                <i class="bi bi-trash"></i> Eliminar
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="materiasAsignadas.length === 0">
+            <td colspan="3" class="text-center">No hay materias asignadas</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>

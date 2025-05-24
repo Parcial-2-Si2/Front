@@ -8,7 +8,7 @@
     
     <a href="index.html" class="d-flex align-items-center" style="width: 280px;">
       <img src="assets/img/logo.png" alt="45" width="45">
-      <span class="logo-text ms-2">IA<span class="logo-ia">cademi</span></span>
+      <span class="logo-text ms-2">IA<span class="logo-ia">cademic</span></span>
     </a>
     <!-- Botón de alternancia de la barra lateral -->
     <i class="bi bi-list toggle-sidebar-btn" (click)="onToggleSidebar()"></i>
@@ -38,6 +38,11 @@
           href="#"
           data-bs-toggle="dropdown"
         >
+        <img
+            [src]="usuarioActual?.url_imagen ?? imageUrl"
+            alt="Profile"
+            class="rounded-circle"
+          />
           <span class="d-none d-md-block dropdown-toggle ps-2"
             >{{ usuarioActual?.nombreCompleto ? usuarioActual?.nombreCompleto : "Docente" }}
           </span>

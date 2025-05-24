@@ -20,14 +20,32 @@ export class SidebarComponent {
       isExpanded: false,
     },
     {
-      label: 'Docentes',
+      label: 'Usuarios',
       route: '/dashboard/docentes',
       icon: 'bi bi-person',
       isExpanded: false,
     },
     {
-      label: 'Inventario',
-      icon: 'bi bi-box-seam',
+      label: 'Estudiantes',
+      route: '/dashboard/estudiantes',
+      icon: 'bi bi-people',
+      isExpanded: false,
+    },
+    {
+      label: 'Inscripciones',
+      route: '/dashboard/clientes',
+      icon: 'bi bi-people',
+      isExpanded: false,
+    },
+    {
+      label: 'Cursos',
+      route: '/dashboard/clientes',
+      icon: 'bi bi-columns-gap',
+      isExpanded: false,
+    },
+    {
+      label: 'Materias',
+      icon: 'bi bi-clipboard2-check',
       children: [
         {
           label: 'Productos',
@@ -51,15 +69,10 @@ export class SidebarComponent {
         }
       ],
     },
+    
     {
-      label: 'Clientes',
-      route: '/dashboard/clientes',
-      icon: 'bi bi-people',
-      isExpanded: false,
-    },
-    {
-      label: 'Ventas',
-      icon: 'bi bi-cart',
+      label: 'Gestiones',
+      icon: 'bi bi-calendar-event',
       children: [
         {
           label: 'Ventas',
@@ -83,6 +96,7 @@ export class SidebarComponent {
         }
       ],
     },
+    /*
     {
       label: 'Pagos',
       icon: 'bi bi-credit-card',
@@ -134,7 +148,7 @@ export class SidebarComponent {
           icon: 'bi bi-file-earmark-bar-graph',
         }
       ]
-    },
+    },*/
   ];
 
   toggleCollapse(selectedItem: any) {

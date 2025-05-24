@@ -1,1 +1,171 @@
-<p>docente works!</p>
+<div class="pagetitle">
+  <h1>Usuarios</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Home</a></li>
+      <li class="breadcrumb-item active">Usuarios</li>
+    </ol>
+  </nav>
+</div>
+
+<!-- Botón para agregar nuevo -->
+<div class="d-flex justify-content-start mb-3 mt-4">
+  <button class="btn btn-primary" (click)="abrirModal()">
+    <i class="bi bi-plus-circle"></i>&nbsp;&nbsp; Nuevo Usuario
+  </button>
+</div>
+
+<div class="col-12">
+  <div class="card recent-sales overflow-auto">
+    <div class="card-body pt-3">
+      <!-- Encabezado de la tabla con el selector de registros y campo de búsqueda -->
+      <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex align-items-center">
+          <span class="me-2">Mostrando</span>
+          <select class="form-select" (change)="changeLimit($event)">
+            <option value="10">10</option>
+            <option value="20">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span class="ms-2 text-nowrap">registros por página</span>
+        </div>
+
+        <!-- Campo de filtro por rol -->
+        <div class="d-flex align-items-center ms-3">
+          <select class="form-select" (change)="filtrarPorRol($event)">
+            <option value="">Todos</option>
+            <option value="true">Docente</option>
+            <option value="false">Administrador</option>
+          </select>
+        </div>
+
+        <!-- Campo de búsqueda -->
+        <div class="d-flex align-items-center">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar..."
+            (input)="searchTable($event)"
+          />
+        </div>
+      </div>
+
+      <table class="table table-hover">
+        <thead class="text-center">
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">NOMBRE</th>
+            <th scope="col">EMAIL</th>
+            <th scope="col">ROL</th>
+            <th scope="col">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let docente of docentes | paginate: { itemsPerPage: limit, currentPage: page }; let i = index">
+            <th class="text-center" scope="row">{{ docente.ci }}</th>
+            <td class="text-center">{{ docente.nombreCompleto }}</td>
+            <td class="text-center">{{ docente.gmail }}</td>
+            <td class="text-center">{{ docente.esDocente ? 'Docente' : 'Administrador' }}</td>
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-primary me-1"
+                (click)="verDetalle(docente)"
+              >
+                <i class="bi bi-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-warning me-1" (click)="editarDocente(docente)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="eliminarDocente(docente)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="docentes.length === 0">
+            <td colspan="5" class="text-center">No se encontraron registros</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginación -->
+      <div *ngIf="docentes.length > 0" class="d-flex justify-content-end mt-3">
+        <pagination-controls
+          class="custom-pagination"
+          (pageChange)="page = $event"
+          previousLabel="Anterior"
+          nextLabel="Siguiente"
+        ></pagination-controls>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para agregar/editar usuario -->
+  <div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">
+            {{ isEditMode ? "Editar Usuario" : "Crear Nuevo Usuario" }}
+          </h5>
+          <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+        </div>
+        <form [formGroup]="docenteForm" (ngSubmit)="onSubmit()">
+          <div class="modal-body">
+            <!-- Nombre Completo -->
+            <div class="mb-3">
+              <label for="nombreCompleto" class="form-label">Nombre Completo:</label>
+              <input type="text" formControlName="nombreCompleto" class="form-control" id="nombreCompleto" />
+              <span *ngIf="isValidField('nombreCompleto')" class="form-text text-danger">
+                * {{ getMessageError("nombreCompleto") }}
+              </span>
+            </div>
+
+            <!-- CI -->
+            <div class="mb-3">
+              <label for="ci" class="form-label">CI:</label>
+              <input type="text" formControlName="ci" class="form-control" id="ci" />
+              <span *ngIf="isValidField('ci')" class="form-text text-danger">
+                * {{ getMessageError("ci") }}
+              </span>
+            </div>
+
+            <!-- Rol -->
+            <div class="mb-3">
+              <label for="esDocente" class="form-label">Rol:</label>
+              <select class="form-select" formControlName="esDocente" id="esDocente">
+                <option [ngValue]="true">Docente</option>
+                <option [ngValue]="false">Administrador</option>
+              </select>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="gmail" class="form-label">Email:</label>
+              <input formControlName="gmail" class="form-control" id="gmail" />
+              <span *ngIf="isValidField('gmail')" class="form-text text-danger">
+                * {{ getMessageError("gmail") }}
+              </span>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="mb-3">
+              <label for="contrasena" class="form-label">Contraseña:</label>
+              <input type="password" formControlName="contrasena" class="form-control" id="contrasena" />
+              <span *ngIf="isValidField('contrasena')" class="form-text text-danger">
+                * {{ getMessageError("contrasena") }}
+              </span>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              {{ isEditMode ? "Actualizar" : "Guardar" }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

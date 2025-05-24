@@ -1,1 +1,253 @@
-<p>estudiante works!</p>
+<div class="pagetitle">
+  <h1>Estudiantes</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Home</a></li>
+      <li class="breadcrumb-item active">Estudiantes</li>
+    </ol>
+  </nav>
+</div>
+
+<!-- Botón para agregar nuevo -->
+<div class="d-flex justify-content-start mb-3 mt-4">
+  <button class="btn btn-primary" (click)="abrirModal()">
+    <i class="bi bi-plus-circle"></i>&nbsp;&nbsp; Nuevo Estudiante
+  </button>
+</div>
+
+<div class="col-12">
+  <div class="card recent-sales overflow-auto">
+    <div class="card-body pt-3">
+      <!-- Encabezado de la tabla con el selector de registros y campo de búsqueda -->
+      <div class="d-flex justify-content-between mb-3">
+        <!-- Selector de cantidad de registros -->
+        <div class="d-flex align-items-center">
+          <span class="me-2">Mostrando</span>
+          <select class="form-select" (change)="changeLimit($event)">
+            <option value="10">10</option>
+            <option value="20">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span class="ms-2 text-nowrap">registros por página</span>
+        </div>
+
+        <!-- Campo de búsqueda -->
+        <div class="d-flex align-items-center">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar..."
+            (input)="searchTable($event)"
+          />
+        </div>
+      </div>
+
+      <table class="table table-hover">
+        <thead class="">
+          <tr class="text-center">
+            <th scope="col">CI</th>
+            <th scope="col">IMAGEN</th>
+            <th scope="col">NOMBRE</th>
+            <th scope="col">FECHA DE NACIMIENTO</th>
+            <th scope="col">ACCIONES</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (estudiantes.length > 0) { @for (estudiante of estudiantes |
+          paginate: { itemsPerPage: limit, currentPage: page }; track $index) {
+          <tr>
+            <th class="text-center" scope="row">
+              {{ estudiante.ci }}
+            </th>
+            <td class="text-center">
+              <img
+                [src]="estudiante.imagen_url || getImageDefault()"
+                alt="{{ estudiante.nombreCompleto }}"
+                width="50"
+                height="50"
+              />
+            </td>
+            <td class="text-center" scope="row">{{ estudiante.nombreCompleto }}</td>
+            <td class="text-center" scope="row">{{ estudiante.fechaNacimiento }}</td>
+            <td class="text-center">
+              <button
+                class="btn btn-sm btn-warning me-1"
+                (click)="editarEstudiante(estudiante)"
+              >
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button
+                class="btn btn-sm btn-danger"
+                (click)="eliminarEstudiante(estudiante)"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          } } @else {
+          <tr>
+            <td colspan="3" class="text-center">No se encontraron registros</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Paginación -->
+      @if (estudiantes.length > 0) {
+      <div class="d-flex justify-content-end mt-3">
+        <pagination-controls
+          class="custom-pagination"
+          (pageChange)="page = $event"
+          previousLabel="Anterior"
+          nextLabel="Siguiente"
+        ></pagination-controls>
+      </div>
+      }
+    </div>
+  </div>
+
+  <!-- Modal para agregar nueva categoria -->
+  <div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">
+            {{ isEditMode ? "Editar estudiante" : "Crear Nuevo estudiante" }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            (click)="cerrarModal()"
+          ></button>
+        </div>
+        <form [formGroup]="estudianteForm" (ngSubmit)="onSubmit()">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="nombreCompleto" class="form-label"
+                >Nombre del estudiante:</label
+              >
+              <input
+                type="text"
+                formControlName="nombreCompleto"
+                class="form-control"
+                id="nombreCompleto"
+              />
+              <span
+                *ngIf="isValidField('nombreCompleto')"
+                class="form-text text-danger"
+              >
+                * {{ getMessageError("nombreCompleto") }}
+              </span>
+            </div>
+
+            <div class="mb-3">
+              <label for="fechaNacimiento" class="form-label"
+                >Fecha de nacimiento:</label
+              >
+              <input
+                type="date"
+                formControlName="fechaNacimiento"
+                class="form-control"
+                id="fechaNacimiento"
+              />
+              <span
+                *ngIf="isValidField('fechaNacimiento')"
+                class="form-text text-danger"
+              >
+                * {{ getMessageError("fechaNacimiento") }}
+              </span>
+            </div>
+
+            <div class="mb-3">
+              <label for="ci" class="form-label"
+                >Carnet de identidad:</label
+              >
+              <input
+                type="number"
+                formControlName="ci"
+                class="form-control"
+                id="ci"
+              />
+              <span
+                *ngIf="isValidField('ci')"
+                class="form-text text-danger"
+              >
+                * {{ getMessageError("ci") }}
+              </span>
+            </div>
+            
+            <!-- Campo para la imagen -->
+            <div class="mb-3">
+              <label class="form-label"
+                >Imagen de estudiante:</label
+              >
+              <div class="container-photo">
+                <div class="profile-photo">
+                  <label>
+                    <figure class="image-preview">
+                      <img
+                        id="image-preview"
+                        [src]="imagePreview"
+                        alt="Preview"
+                      />
+                    </figure>
+                  </label>
+                  <div (click)="onDeleteImage()" class="delete-icon">
+                    <i class="bx bx-x"></i>
+                  </div>
+                  <label for="foto_url">
+                    <div class="edit-icon">
+                      <i class="bx bx-pencil"></i>
+                    </div>
+                  </label>
+                </div>
+                <p class="types-files">
+                  Tipos de archivos permitidos: png, jpg, jpeg.
+                </p>
+                <input
+                  formControlName="foto_url"
+                  (change)="onFileChange($event)"
+                  type="file"
+                  id="foto_url"
+                  name="foto_url"
+                  accept="image/*"
+                  hidden
+                />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="cerrarModal()"
+            >
+              Cancelar
+            </button>
+            
+            <button
+              type="submit"
+              [disabled]="isLoading"
+              class="btn btn-primary"
+            >
+              <span *ngIf="!isLoading">{{
+                isEditMode ? "Actualizar" : "Guardar"
+              }}</span>
+              <div *ngIf="isLoading">
+                <span
+                  class="spinner-border spinner-border-sm"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                {{ isEditMode ? "Actualizando..." : "Guardando.." }}
+              </div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+

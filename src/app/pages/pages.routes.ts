@@ -1,5 +1,6 @@
 import { Routes } from "@angular/router";
 import { DocenteComponent } from "./docente/docente.component";
+import { EstudianteComponent } from "./estudiante/estudiante.component";
 //import { DashboardComponent } from "./dashboard/dashboard.component";
 
 
@@ -8,9 +9,17 @@ export const PagesRoutes: Routes = [
    // path: '',
    // component: DashboardComponent,
  // },
-  {
-    path: 'Docente',
+ {
+    path: 'usuario',
     component: DocenteComponent,
+  },
+  {
+    path: 'docentes',
+    component: DocenteComponent,
+  },
+  {
+    path: 'estudiantes',
+    component: EstudianteComponent,
   },
  // {
   //  path: 'reportes',

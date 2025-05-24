@@ -4,4 +4,5 @@ export interface Docente {
   contrasena: string;
   gmail: string;
   esDocente: boolean;
+  url_imagen?: string;
 }
