@@ -54,6 +54,12 @@
             <td>{{ curso.Nivel }}</td>
             <td>{{ curso.descripcion }}</td>
             <td class="text-center">
+              <button
+                class="btn btn-sm btn-primary me-1" aria-placeholder="asignar materia"
+                (click)="verDetalle(curso)"
+              >
+                <i class="bi bi-clipboard-minus"></i>
+              </button>
               <button class="btn btn-sm btn-warning me-1" (click)="editarCurso(curso)">
                 <i class="bi bi-pencil"></i>
               </button>

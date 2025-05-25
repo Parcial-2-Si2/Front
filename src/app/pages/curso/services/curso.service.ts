@@ -35,6 +35,16 @@ export class CursoService {
     );
   }
 
+  obtenerCursoPorId(id: number): Observable<Curso> {
+    const url = `${this.BASE_URL}Curso/${id}`;
+    return this.http.get<Curso>(url, { headers: this.getHeaders() }).pipe(
+      catchError((error) => {
+        console.error('❌ Error al obtener el curso por ID:', error);
+        return throwError(() => 'Error al obtener el curso por ID');
+      })
+    );
+  }
+
   guardarCurso(curso: Curso): Observable<Curso> {
     const url = `${this.BASE_URL}Curso/`;
     return this.http.post<Curso>(url, curso, { headers: this.getHeaders() }).pipe(

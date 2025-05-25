@@ -4,6 +4,8 @@ import { EstudianteComponent } from "./estudiante/estudiante.component";
 import { CursoComponent } from "./curso/curso.component";
 import { MateriaComponent } from "./materia/materia.component";
 import { DocenteMateriaComponent } from "./docente-materia/docente-materia.component";
+import { InscripcionComponent } from "./inscripcion/inscripcion.component";
+import { MateriaCursoComponent } from "./materia-curso/materia-curso.component";
 //import { DashboardComponent } from "./dashboard/dashboard.component";
 
 
@@ -35,6 +37,14 @@ export const PagesRoutes: Routes = [
   {
     path: 'docente-materia/:ci',
     component: DocenteMateriaComponent,
+  },
+  {
+    path: 'inscripcion',
+    component: InscripcionComponent,
+  },
+  {
+    path: 'materia-curso/:id',
+    component: MateriaCursoComponent,
   },
  // {
   //  path: 'reportes',

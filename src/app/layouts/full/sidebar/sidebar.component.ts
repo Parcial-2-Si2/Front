@@ -33,7 +33,7 @@ export class SidebarComponent {
     },
     {
       label: 'Inscripciones',
-      route: '/dashboard/clientes',
+      route: '/dashboard/inscripcion',
       icon: 'bi bi-clipboard-plus',
       isExpanded: false,
     },

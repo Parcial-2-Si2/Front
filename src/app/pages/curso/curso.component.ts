@@ -12,6 +12,8 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { CursoService } from './services/curso.service';
 import { AlertsService } from '../../../shared/services/alerts.service';
 import { ValidatorsService } from '../../../shared/services/validators.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-cursos',
@@ -36,10 +38,12 @@ export class CursoComponent implements OnInit {
   curso!: Curso;
 
   constructor(
+    private router: Router, 
     private fb: FormBuilder,
     private cursoService: CursoService,
     private alertsService: AlertsService,
-    private validatorsService: ValidatorsService
+    private validatorsService: ValidatorsService,
+    private navigationService: NavigationService
   ) {}
 
   ngOnInit(): void {
@@ -168,5 +172,11 @@ export class CursoComponent implements OnInit {
 
   getMessageError(field: string): string | null {
     return this.validatorsService.getErrorMessage(this.cursoForm, field);
+  }
+
+  verDetalle(curso: Curso): void {
+      // Navegar a la ruta de detalle del docente
+      this.navigationService.setOrigen('curso');
+      this.router.navigate(['/dashboard/materia-curso', curso.id]);
   }
 }
