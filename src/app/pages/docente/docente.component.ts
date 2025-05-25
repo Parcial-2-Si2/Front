@@ -12,6 +12,8 @@ import { ValidatorsService } from '../../../shared/services/validators.service';
 import { CommonModule } from '@angular/common';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { DocenteService } from './services/docentes.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-docentes',
@@ -34,14 +36,15 @@ export class DocenteComponent {
   modalVisible: boolean = false;
   isEditMode: boolean = false;
   docenteForm!: FormGroup;
-  navigationService: any;
-  router: any;
+  
 
   constructor(
+    private router: Router, 
     private docenteService: DocenteService,
     private alertsService: AlertsService,
     private validatorsService: ValidatorsService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private navigationService: NavigationService
   ) {}
 
   ngOnInit(): void {
@@ -66,20 +69,22 @@ export class DocenteComponent {
   }
 
   searchTable(event: Event): void {
-    const target = event.target as HTMLInputElement;
-    const searchTerm = target.value.toLowerCase();
+  const target = event.target as HTMLInputElement;
+  const searchTerm = target.value.toLowerCase();
 
-    if (searchTerm === '') {
-      this.docentes = [...this.todosLosDocentes];
-    } else {
-      this.docentes = this.todosLosDocentes.filter(
-        (docente) =>
-          docente.nombreCompleto.toLowerCase().includes(searchTerm) ||
-          docente.gmail.toLowerCase().includes(searchTerm) 
-      );
-    }
-    this.page = 1;
+  if (searchTerm === '') {
+    this.docentes = [...this.todosLosDocentes];
+  } else {
+    this.docentes = this.todosLosDocentes.filter((docente) =>
+      docente.nombreCompleto.toLowerCase().includes(searchTerm) ||
+      docente.gmail.toLowerCase().includes(searchTerm) ||
+      docente.ci?.toString().includes(searchTerm)  // 🔍 búsqueda por CI
+    );
   }
+
+  this.page = 1;
+}
+
   filtrarPorRol(event: any): void {
   const valorSeleccionado = event.target.value;
 
@@ -230,7 +235,7 @@ export class DocenteComponent {
   getMessageError(field: string): string | null {
     return this.validatorsService.getErrorMessage(this.docenteForm, field);
   }
-    verDetalle(docente: Docente): void {
+  verDetalle(docente: Docente): void {
     // Navegar a la ruta de detalle del docente
     this.navigationService.setOrigen('docente');
     this.router.navigate(['/dashboard/docente-materia', docente.ci]);

@@ -69,10 +69,11 @@
             <td class="text-center">{{ docente.esDocente ? 'Docente' : 'Administrador' }}</td>
             <td class="text-center">
               <button
-                class="btn btn-sm btn-primary me-1"
+              *ngIf="docente.esDocente"
+                class="btn btn-sm btn-primary me-1" aria-placeholder="asignar materia"
                 (click)="verDetalle(docente)"
               >
-                <i class="bi bi-eye"></i>
+                <i class="bi bi-clipboard-minus"></i>
               </button>
               <button class="btn btn-sm btn-warning me-1" (click)="editarDocente(docente)">
                 <i class="bi bi-pencil"></i>

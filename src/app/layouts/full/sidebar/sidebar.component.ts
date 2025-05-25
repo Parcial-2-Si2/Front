@@ -34,7 +34,7 @@ export class SidebarComponent {
     {
       label: 'Inscripciones',
       route: '/dashboard/clientes',
-      icon: 'bi bi-people',
+      icon: 'bi bi-clipboard-plus',
       isExpanded: false,
     },
     {
@@ -46,34 +46,8 @@ export class SidebarComponent {
     {
       label: 'Materias',
       route: '/dashboard/materias',
-      icon: 'bi bi-columns-gap',
+      icon: 'bi bi-book',
       isExpanded: false,
-    },
-    {
-      label: 'Materias',
-      icon: 'bi bi-clipboard2-check',
-      children: [
-        {
-          label: 'Productos',
-          route: '/dashboard/productos',
-          icon: 'bi bi-box',
-        },
-        {
-          label: 'Marcas',
-          route: '/dashboard/marcas',
-          icon: 'bi bi-tag',
-        },
-        {
-          label: 'Categorias',
-          route: '/dashboard/categorias',
-          icon: 'bi bi-list',
-        },
-        {
-          label: 'Movimiento inventario',
-          route: '/dashboard/movimiento-inventario',
-          icon: 'bi bi-arrow-left-right',
-        }
-      ],
     },
     
     {

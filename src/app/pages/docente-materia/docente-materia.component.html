@@ -8,80 +8,55 @@
   </nav>
 </div>
 
-<div class="col-12">
-  <div class="card overflow-auto">
-    <div class="card-body p-5">
-
-      <!-- Encabezado con info del docente -->
-      <div class="mb-4">
-        <h4 class="fw-bold mb-3"><i class="bi bi-person-circle"></i>&nbsp; Información del Docente</h4>
-        <div class="row">
-          <div class="col-md-4">
-            <label><strong>CI del Docente:</strong></label>
-            <p>{{ docenteCI }}</p>
-          </div>
-          <div class="col-md-4">
-            <label><strong>Nombre Completo:</strong></label>
-            <p>{{ docenteSeleccionado }}</p>
-          </div>
-          <div class="col-md-4">
-            <label><strong>Correo:</strong></label>
-            <p>{{ docenteSeleccionado}}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Botón para regresar -->
-      <div class="mb-4">
-        <button class="btn btn-secondary" (click)="regresar()">
-          <i class="bi bi-arrow-left"></i> Regresar
-        </button>
-      </div>
-
-      <!-- Sección de asignación de materias -->
-      <div class="row align-items-end mb-4">
-        <div class="col-md-8">
-          <label for="materiaSelect" class="form-label">Asignar nueva materia</label>
-          <select class="form-select" id="materiaSelect" [(ngModel)]="materiaSeleccionadaId">
-            <option [ngValue]="null" disabled>Seleccione una materia</option>
-            <option *ngFor="let materia of todasLasMaterias" [value]="materia.id">
-              {{ materia.nombre }}
-            </option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <button class="btn btn-primary w-100" (click)="asignarMateria()">
-            <i class="bi bi-plus-circle"></i> Asignar Materia
-          </button>
-        </div>
-      </div>
-
-      <!-- Tabla de materias asignadas -->
-      <h5 class="fw-bold mb-3"><i class="bi bi-journal-text"></i>&nbsp; Materias Asignadas</h5>
-      <table class="table table-striped">
-        <thead class="text-center">
-          <tr>
-            <th>#</th>
-            <th>Materia</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let asignacion of materiasAsignadas; let i = index">
-            <td class="text-center">{{ i + 1 }}</td>
-            <td class="text-center">{{ asignacion.materia }}</td>
-            <td class="text-center">
-              <button class="btn btn-danger btn-sm" (click)="eliminarAsignacion(i)">
-                <i class="bi bi-trash"></i> Eliminar
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="materiasAsignadas.length === 0">
-            <td colspan="3" class="text-center">No hay materias asignadas</td>
-          </tr>
-        </tbody>
-      </table>
-
-    </div>
+<!-- Información del docente -->
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Información del Docente</h5>
+    <p><strong>Nombre:</strong> {{ docenteSeleccionado.nombreCompleto }}</p>
+    <p><strong>CI:</strong> {{ docenteSeleccionado.ci }}</p>
+    <p><strong>Correo:</strong> {{ docenteSeleccionado.gmail }}</p>
+    <!-- Agrega más campos si es necesario -->
   </div>
 </div>
+
+<!-- Selector de materia -->
+<div class="mb-3">
+  <label for="materiaSelect" class="form-label">Seleccionar materia:</label>
+  <select [(ngModel)]="materiaSeleccionadaId" class="form-select" id="materiaSelect">
+    <option [ngValue]="null">-- Seleccione una materia --</option>
+    <option *ngFor="let materia of todasLasMaterias" [ngValue]="materia.id">
+      {{ materia.nombre }}
+    </option>
+  </select>
+  <button class="btn btn-success mt-2" (click)="asignarMateria()">Asignar</button>
+</div>
+
+<!-- Tabla de asignaciones -->
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Materias Asignadas</h5>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let asignacion of materiasAsignadas">
+          <td> {{ obtenerNombreMateria(asignacion.materia_id) }}</td>
+          <td>
+            <button class="btn btn-danger btn-sm" (click)="eliminarAsignacion(asignacion.id!)">
+              <i class="bi bi-trash"></i> Eliminar
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="materiasAsignadas.length === 0">
+          <td colspan="3" class="text-center">No hay materias asignadas</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<button class="btn btn-secondary mt-3" (click)="volver()">Volver</button>

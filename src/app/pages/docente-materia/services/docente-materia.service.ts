@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, Subject, tap, throwError } from 'rxjs';
-import { environment } from '../../../enviroment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, Subject, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../../../enviroment';
 import { DocenteMateria } from '../interfaces/docenteMateria.interface';
-@Injectable({
-  providedIn: 'root',
-})
+
+@Injectable({ providedIn: 'root' })
 export class DocenteMateriaService {
   private readonly BASE_URL: string = environment.baseUrl;
   private readonly TOKEN_KEY = 'auth_token';
@@ -15,74 +15,73 @@ export class DocenteMateriaService {
 
   constructor(private http: HttpClient) {}
 
+private getHeaders(): HttpHeaders {
+  const token = localStorage.getItem(this.TOKEN_KEY) || '';
+  return new HttpHeaders({
+    'Authorization': token,
+    'Accept': 'application/json'
+  });
+}
+
+
   obtenerAsignaciones(): Observable<DocenteMateria[]> {
     const url = `${this.BASE_URL}DocenteMateria/`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.get<DocenteMateria[]>(url, { headers }).pipe(
+    return this.http.get<DocenteMateria[]>(url, { headers: this.getHeaders() }).pipe(
+      map(asignaciones => asignaciones.sort((a, b) => a.id! - b.id!)),
       tap(asignaciones => this._asignacionesSubject.next(asignaciones)),
-      catchError(() => throwError(() => 'Error al obtener las asignaciones'))
+      catchError((error) => {
+        console.error('Error al obtener las asignaciones:', error);
+        return throwError(() => 'Error al obtener las asignaciones');
+      })
     );
   }
 
-  guardarAsignacion(asignacion: DocenteMateria): Observable<DocenteMateria> {
+  guardarAsignacion(asignacion: Partial<DocenteMateria>): Observable<DocenteMateria> {
     const url = `${this.BASE_URL}DocenteMateria/`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.post<DocenteMateria>(url, asignacion, { headers }).pipe(
-      catchError(() => throwError(() => 'Error al guardar la asignación'))
+    return this.http.post<DocenteMateria>(url, asignacion, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError((error) => {
+        console.error(' Error al guardar la asignación:', error);
+        return throwError(() => 'Error al guardar la asignación');
+      })
     );
   }
 
   actualizarAsignacion(id: number, asignacion: DocenteMateria): Observable<DocenteMateria> {
     const url = `${this.BASE_URL}DocenteMateria/${id}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.put<DocenteMateria>(url, asignacion, { headers }).pipe(
-      catchError(() => throwError(() => 'Error al actualizar la asignación'))
+    return this.http.put<DocenteMateria>(url, asignacion, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError((error) => {
+        console.error(' Error al actualizar la asignación:', error);
+        return throwError(() => 'Error al actualizar la asignación');
+      })
     );
   }
 
   eliminarAsignacion(id: number): Observable<string> {
     const url = `${this.BASE_URL}DocenteMateria/${id}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.delete<string>(url, { headers }).pipe(
-      catchError(() => throwError(() => 'Error al eliminar la asignación'))
+    return this.http.delete<string>(url, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError((error) => {
+        console.error('Error al eliminar la asignación:', error);
+        return throwError(() => 'Error al eliminar la asignación');
+      })
     );
   }
 
-  buscarPorDocente(docente_ci: number): Observable<DocenteMateria[]> {
-    const url = `${this.BASE_URL}DocenteMateria/buscar/${docente_ci}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.get<DocenteMateria[]>(url, { headers }).pipe(
-      catchError(() => throwError(() => 'Error al buscar asignaciones por docente'))
-    );
-  }
-  obtenerPorDocente(ci: number): Observable<DocenteMateria[]> {
+  buscarPorDocenteCI(ci: number): Observable<DocenteMateria[]> {
     const url = `${this.BASE_URL}DocenteMateria/buscar/${ci}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.get<DocenteMateria[]>(url, { headers }).pipe(
-      tap((res) => this._asignacionesSubject.next(res)),
-      catchError(() => throwError(() => 'Error al obtener las asignaciones del docente'))
-    );
-  }
-
-  asignarMateria(asignacion: DocenteMateria): Observable<DocenteMateria> {
-    const url = `${this.BASE_URL}DocenteMateria/`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.post<DocenteMateria>(url, asignacion, { headers }).pipe(
-      catchError(() => throwError(() => 'Error al asignar la materia al docente'))
+    console.log('📤 Enviando solicitud con CI:', ci, 'Tipo:', typeof ci);
+    return this.http.get<DocenteMateria[]>(url, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError((error) => {
+        console.error(' Error al buscar asignaciones por CI:', error);
+        return throwError(() => 'Error al buscar asignaciones por CI');
+      })
     );
   }
 }

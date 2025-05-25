@@ -1,8 +1,21 @@
-// src/app/pages/docente/interfaces/docente-materia.interface.ts
 export interface DocenteMateria {
   id?: number;
-  fecha: string;
+  fecha: string; // en formato ISO yyyy-MM-dd
   docente_ci: number;
   materia_id: number;
-  materia?: { nombre: string }; // si el backend retorna info expandida
+
+  // opcionalmente, puedes incluir estos si el backend también devuelve los objetos anidados:
+  docente?: {
+    ci: number;
+    nombreCompleto?: string;
+    gmail?: string;
+    telefono?: string;
+    imagen_url?: string;
+  };
+
+  materia?: {
+    id: number;
+    nombre: string;
+    descripcion?: string;
+  };
 }
