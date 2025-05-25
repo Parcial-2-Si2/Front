@@ -45,6 +45,12 @@ export class SidebarComponent {
     },
     {
       label: 'Materias',
+      route: '/dashboard/materias',
+      icon: 'bi bi-columns-gap',
+      isExpanded: false,
+    },
+    {
+      label: 'Materias',
       icon: 'bi bi-clipboard2-check',
       children: [
         {

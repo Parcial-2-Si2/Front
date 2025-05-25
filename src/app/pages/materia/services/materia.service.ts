@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
-import { catchError, map, Observable, Subject, tap, throwError } from 'rxjs';
-import { environment } from '../../../enviroment';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, Subject, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from '../../../enviroment';
 import { Materia } from '../interfaces/materia.interfaces';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class MateriaService {
   private readonly BASE_URL: string = environment.baseUrl;
   private readonly TOKEN_KEY = 'auth_token';
@@ -16,45 +15,63 @@ export class MateriaService {
 
   constructor(private http: HttpClient) {}
 
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem(this.TOKEN_KEY) || '';
+    return new HttpHeaders({
+      'Authorization': token,
+      'Accept': 'application/json'
+    });
+  }
+
   obtenerMaterias(): Observable<Materia[]> {
     const url = `${this.BASE_URL}Materias/`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.get<Materia[]>(url, { headers }).pipe(
+    return this.http.get<Materia[]>(url, { headers: this.getHeaders() }).pipe(
       map(materias => materias.sort((a, b) => a.id! - b.id!)),
-      tap((materias) => this._materiasSubject.next(materias)),
-      catchError(() => throwError(() => 'Error al obtener las materias'))
+      tap(materias => this._materiasSubject.next(materias)),
+      catchError(error => {
+        console.error('Error al obtener las materias:', error);
+        return throwError(() => 'Error al obtener las materias');
+      })
     );
   }
 
   guardarMateria(materia: Materia): Observable<Materia> {
     const url = `${this.BASE_URL}Materias/`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.post<Materia>(url, materia, { headers }).pipe(
-      catchError(() => throwError(() => 'Error al guardar la materia'))
+    return this.http.post<Materia>(url, materia, { headers: this.getHeaders() }).pipe(
+      catchError(error => {
+        console.error('Error al guardar la materia:', error);
+        return throwError(() => 'Error al guardar la materia');
+      })
     );
   }
 
   actualizarMateria(id: number, materia: Materia): Observable<Materia> {
     const url = `${this.BASE_URL}Materias/${id}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.put<Materia>(url, materia, { headers }).pipe(
-      catchError(() => throwError(() => 'Error al actualizar la materia'))
+    return this.http.put<Materia>(url, materia, { headers: this.getHeaders() }).pipe(
+      catchError(error => {
+        console.error('Error al actualizar la materia:', error);
+        return throwError(() => 'Error al actualizar la materia');
+      })
     );
   }
 
-  eliminarMateria(id: number): Observable<string> {
+  eliminarMateria(id: number): Observable<any> {
     const url = `${this.BASE_URL}Materias/${id}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.delete(url, { headers: this.getHeaders() }).pipe(
+      catchError(error => {
+        console.error('Error al eliminar la materia:', error);
+        return throwError(() => 'Error al eliminar la materia');
+      })
+    );
+  }
 
-    return this.http.delete<string>(url, { headers }).pipe(
-      catchError(() => throwError(() => 'Error al eliminar la materia'))
+  obtenerMateriaPorId(id: number): Observable<Materia> {
+    const url = `${this.BASE_URL}Materias/${id}`;
+    return this.http.get<Materia>(url, { headers: this.getHeaders() }).pipe(
+      catchError(error => {
+        console.error('Error al obtener la materia por ID:', error);
+        return throwError(() => 'Error al obtener la materia por ID');
+      })
     );
   }
 }

@@ -2,6 +2,7 @@ import { Routes } from "@angular/router";
 import { DocenteComponent } from "./docente/docente.component";
 import { EstudianteComponent } from "./estudiante/estudiante.component";
 import { CursoComponent } from "./curso/curso.component";
+import { MateriaComponent } from "./materia/materia.component";
 //import { DashboardComponent } from "./dashboard/dashboard.component";
 
 
@@ -25,6 +26,10 @@ export const PagesRoutes: Routes = [
   {
     path: 'curso',
     component: CursoComponent,
+  },
+  {
+    path: 'materias',
+    component: MateriaComponent,
   },
  // {
   //  path: 'reportes',

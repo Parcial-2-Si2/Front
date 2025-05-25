@@ -1,1 +1,114 @@
-<p>materia works!</p>
+<div class="pagetitle">
+  <h1>Materias</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Inicio</a></li>
+      <li class="breadcrumb-item active">Materias</li>
+    </ol>
+  </nav>
+</div>
+
+<!-- Botón para agregar nuevo -->
+<div class="d-flex justify-content-start mb-3 mt-4">
+  <button class="btn btn-primary" (click)="abrirModal()">
+    <i class="bi bi-plus-circle"></i>&nbsp;&nbsp; Nueva Materia
+  </button>
+</div>
+
+<div class="col-12">
+  <div class="card recent-sales overflow-auto">
+    <div class="card-body pt-3">
+      <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex align-items-center">
+          <span class="me-2">Mostrando</span>
+          <select class="form-select" (change)="changeLimit($event)">
+            <option value="10">10</option>
+            <option value="20">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span class="ms-2 text-nowrap">registros por página</span>
+        </div>
+        <div class="d-flex align-items-center">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar..."
+            (input)="searchTable($event)"
+          />
+        </div>
+      </div>
+
+      <table class="table table-hover">
+        <thead>
+          <tr class="text-center">
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let materia of materias | paginate: { itemsPerPage: limit, currentPage: page }">
+            <td class="text-center">{{ materia.id }}</td>
+            <td class="text-center">{{ materia.nombre }}</td>
+            <td class="text-center">{{ materia.descripcion || '-' }}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-warning me-1" (click)="editarMateria(materia)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="eliminarMateria(materia)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="materias.length === 0">
+            <td colspan="4" class="text-center">No se encontraron registros</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="d-flex justify-content-end mt-3" *ngIf="materias.length > 0">
+        <pagination-controls
+          class="custom-pagination"
+          (pageChange)="page = $event"
+          previousLabel="Anterior"
+          nextLabel="Siguiente">
+        </pagination-controls>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ isEditMode ? 'Editar Materia' : 'Nueva Materia' }}</h5>
+          <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+        </div>
+        <form [formGroup]="materiaForm" (ngSubmit)="onSubmit()">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input type="text" formControlName="nombre" id="nombre" class="form-control">
+              <span *ngIf="isValidField('nombre')" class="text-danger">
+                * {{ getMessageError('nombre') }}
+              </span>
+            </div>
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción</label>
+              <textarea formControlName="descripcion" id="descripcion" class="form-control"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
