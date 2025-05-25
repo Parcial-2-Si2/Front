@@ -39,7 +39,7 @@ export class SidebarComponent {
     },
     {
       label: 'Cursos',
-      route: '/dashboard/clientes',
+      route: '/dashboard/curso',
       icon: 'bi bi-columns-gap',
       isExpanded: false,
     },

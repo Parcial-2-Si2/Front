@@ -107,7 +107,7 @@
     </div>
   </div>
 
-  <!-- Modal para agregar nueva categoria -->
+  <!-- Modal para agregar nuevo estudiante -->
   <div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -206,7 +206,7 @@
                   Tipos de archivos permitidos: png, jpg, jpeg.
                 </p>
                 <input
-                  formControlName="foto_url"
+                  
                   (change)="onFileChange($event)"
                   type="file"
                   id="foto_url"

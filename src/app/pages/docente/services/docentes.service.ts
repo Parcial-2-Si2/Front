@@ -16,65 +16,53 @@ export class DocenteService {
 
   constructor(private http: HttpClient) {}
 
+  // ✅ Generar headers sin "Bearer"
+  private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem(this.TOKEN_KEY) || '';
+    return new HttpHeaders().set('Authorization', token);
+  }
+
   obtenerDocentes(): Observable<Docente[]> {
     const url = `${this.BASE_URL}Docentes/`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.get<Docente[]>(url, { headers }).pipe(
+    return this.http.get<Docente[]>(url, { headers: this.getHeaders() }).pipe(
       map(docentes => docentes.sort((a, b) => a.ci! - b.ci!)),
-      tap((docentes) => this._docentesSubject.next(docentes)),
+      tap(docentes => this._docentesSubject.next(docentes)),
       catchError(() => throwError(() => 'Error al obtener los docentes'))
     );
   }
 
   guardarDocente(docente: Docente): Observable<Docente> {
     const url = `${this.BASE_URL}Docentes/`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.post<Docente>(url, docente, { headers }).pipe(
+    return this.http.post<Docente>(url, docente, { headers: this.getHeaders() }).pipe(
       catchError(() => throwError(() => 'Error al guardar el docente'))
     );
   }
 
   actualizarDocente(ci: number, docente: Docente): Observable<Docente> {
     const url = `${this.BASE_URL}Docentes/${ci}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.put<Docente>(url, docente, { headers }).pipe(
+    return this.http.put<Docente>(url, docente, { headers: this.getHeaders() }).pipe(
       catchError(() => throwError(() => 'Error al actualizar el docente'))
     );
   }
 
   eliminarDocente(ci: number): Observable<string> {
     const url = `${this.BASE_URL}Docentes/${ci}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.delete<string>(url, { headers }).pipe(
+    return this.http.delete<string>(url, { headers: this.getHeaders() }).pipe(
       catchError(() => throwError(() => 'Error al eliminar el docente'))
     );
   }
 
   buscarDocentePorNombre(nombreCompleto: string): Observable<Docente[]> {
     const url = `${this.BASE_URL}Docentes/buscar/${nombreCompleto}`;
-    const token = localStorage.getItem(this.TOKEN_KEY) || '';
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.get<Docente[]>(url, { headers }).pipe(
+    return this.http.get<Docente[]>(url, { headers: this.getHeaders() }).pipe(
       catchError(() => throwError(() => 'Error al buscar docente'))
     );
   }
 
   obtenerDocentePorCI(ci: number): Observable<Docente> {
-  const url = `${this.BASE_URL}Docentes/${ci}`;
-  const token = localStorage.getItem(this.TOKEN_KEY) || '';
-  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-  return this.http.get<Docente>(url, { headers }).pipe(
-    catchError(() => throwError(() => 'Error al obtener el docente'))
-  );
-}
+    const url = `${this.BASE_URL}Docentes/${ci}`;
+    return this.http.get<Docente>(url, { headers: this.getHeaders() }).pipe(
+      catchError(() => throwError(() => 'Error al obtener el docente'))
+    );
+  }
 }

@@ -44,7 +44,7 @@ export class AuthService {
       this.logout();
     }
   }
-
+/*
   login(credentials: LoginRequest): Observable<LoginResponse> {
     const url = `${this.BASE_URL}/auth/login`;
 
@@ -67,6 +67,31 @@ export class AuthService {
     this.getUser().subscribe(); // actualizar datos de usuario
     this.isAuthenticatedSubject.next(true);
   }
+*/
+login(credentials: LoginRequest): Observable<LoginResponse> {
+  const url = `${this.BASE_URL}/auth/login`;
+
+  return this.http.post<LoginResponse>(url, credentials).pipe(
+    map((response) => {
+      this.handleAuthSuccess(response);  // ← ahora usamos directamente el usuario
+      return response;
+    }),
+    catchError((error) => {
+      console.error('Login failed: ', error.error.error);
+      return throwError(() => new Error(error.error.message || 'Error de autenticación'));
+    })
+  );
+}
+
+private handleAuthSuccess(response: LoginResponse): void {
+  localStorage.setItem(this.TOKEN_KEY, response.token);
+
+  // ✅ Aquí se usa directamente el usuario devuelto por el backend
+  const user: Docente = response.Usuario;
+  this.userSubject.next(user);
+  this.isAuthenticatedSubject.next(true);
+  localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+}
 
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
@@ -88,36 +113,38 @@ export class AuthService {
     }
     return true;
   }
-
+/*
   getUser(): Observable<Docente | null> {
-    const token = this.getToken();
-    if (!token) return of(null);
+  const token = this.getToken();
+  if (!token) return of(null);
 
-    const decoded = this.jwtHelper.decodeToken(token);
-    const gmail = decoded?.sub || decoded?.gmail;
+  const decoded = this.jwtHelper.decodeToken(token);
+  const gmail = decoded?.sub || decoded?.gmail;
 
-    if (!gmail) {
-      console.warn('No se pudo extraer el gmail del token');
-      return of(null);
-    }
-
-    const url = `${this.BASE_URL}/docentes/buscar/${gmail}`;
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.get<Docente[]>(url, { headers }).pipe(
-      map((docentes) => {
-        const user = docentes[0]; // si devuelve lista
-        this.userSubject.next(user);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-        return user;
-      }),
-      catchError((error) => {
-        console.error('Error al obtener el perfil del docente', error);
-        return of(null);
-      })
-    );
+  if (!gmail) {
+    console.warn('No se pudo extraer el gmail del token');
+    return of(null);
   }
 
+  const encodedGmail = encodeURIComponent(gmail); // ← para evitar errores con @
+  const url = `${this.BASE_URL}Docentes/buscar/${encodedGmail}`;
+  const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+  return this.http.get<Docente[]>(url, { headers }).pipe(
+    map((docentes) => {
+      const user = Array.isArray(docentes) ? docentes[0] : docentes;
+      this.userSubject.next(user);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      return user;
+    }),
+    catchError((error) => {
+      console.error('Error al obtener el perfil del docente', error);
+      this.logout(); // Opcional: cerrar sesión si hay error
+      return of(null);
+    })
+  );
+}
+*/
   getCurrentUser(): Docente | null {
     return this.userSubject.value;
   }

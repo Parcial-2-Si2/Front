@@ -1,0 +1,119 @@
+<div class="pagetitle">
+  <h1>Cursos</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Home</a></li>
+      <li class="breadcrumb-item active">Cursos</li>
+    </ol>
+  </nav>
+</div>
+
+<div class="d-flex justify-content-start mb-3 mt-4">
+  <button class="btn btn-primary" (click)="abrirModal()">
+    <i class="bi bi-plus-circle"></i>&nbsp;&nbsp; Nuevo Curso
+  </button>
+</div>
+
+<div class="col-12">
+  <div class="card recent-sales overflow-auto">
+    <div class="card-body pt-3">
+      <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex align-items-center">
+          <span class="me-2">Mostrando</span>
+          <select class="form-select" (change)="changeLimit($event)">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span class="ms-2 text-nowrap">registros por página</span>
+        </div>
+        <div class="d-flex align-items-center">
+          <input type="text" class="form-control" placeholder="Buscar..." (input)="searchTable($event)" />
+        </div>
+      </div>
+
+      <table class="table table-hover">
+        <thead>
+          <tr class="text-center">
+            <th scope="col">ID</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Paralelo</th>
+            <th scope="col">Turno</th>
+            <th scope="col">Nivel</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let curso of cursos | paginate: { itemsPerPage: limit, currentPage: page }">
+            <td class="text-center">{{ curso.id }}</td>
+            <td>{{ curso.nombre }}</td>
+            <td>{{ curso.Paralelo }}</td>
+            <td>{{ curso.Turno }}</td>
+            <td>{{ curso.Nivel }}</td>
+            <td>{{ curso.descripcion }}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-warning me-1" (click)="editarCurso(curso)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="eliminarCurso(curso)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="cursos.length === 0">
+            <td colspan="7" class="text-center">No se encontraron registros</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="d-flex justify-content-end mt-3" *ngIf="cursos.length > 0">
+        <pagination-controls (pageChange)="page = $event" previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold">
+            {{ isEditMode ? 'Editar Curso' : 'Crear Nuevo Curso' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+        </div>
+        <form [formGroup]="cursoForm" (ngSubmit)="onSubmit()">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre:</label>
+              <input type="text" formControlName="nombre" class="form-control" id="nombre" />
+            </div>
+            <div class="mb-3">
+              <label for="Paralelo" class="form-label">Paralelo:</label>
+              <input type="text" formControlName="Paralelo" class="form-control" id="Paralelo" />
+            </div>
+            <div class="mb-3">
+              <label for="Turno" class="form-label">Turno:</label>
+              <input type="text" formControlName="Turno" class="form-control" id="Turno" />
+            </div>
+            <div class="mb-3">
+              <label for="Nivel" class="form-label">Nivel:</label>
+              <input type="text" formControlName="Nivel" class="form-control" id="Nivel" />
+            </div>
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción:</label>
+              <input type="text" formControlName="descripcion" class="form-control" id="descripcion" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
