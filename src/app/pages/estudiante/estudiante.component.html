@@ -140,6 +140,40 @@
                 * {{ getMessageError("nombreCompleto") }}
               </span>
             </div>
+            <div class="mb-3">
+              <label for="apoderado" class="form-label"
+                >Nombre del apoderado:</label
+              >
+              <input
+                type="text"
+                formControlName="apoderado"
+                class="form-control"
+                id="apoderado"
+              />
+              <span
+                *ngIf="isValidField('apoderado')"
+                class="form-text text-danger"
+              >
+                * {{ getMessageError("apoderado") }}
+              </span>
+            </div>
+            <div class="mb-3">
+              <label for="telefono" class="form-label"
+                >Telefono del apoderado:</label
+              >
+              <input
+                type="text"
+                formControlName="telefono"
+                class="form-control"
+                id="telefono"
+              />
+              <span
+                *ngIf="isValidField('telefono')"
+                class="form-text text-danger"
+              >
+                * {{ getMessageError("telefono") }}
+              </span>
+            </div>
 
             <div class="mb-3">
               <label for="fechaNacimiento" class="form-label"

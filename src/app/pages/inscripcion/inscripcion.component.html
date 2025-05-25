@@ -1,1 +1,151 @@
-<p>inscripcion works!</p>
+<div class="pagetitle">
+  <h1>Inscripciones</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Inicio</a></li>
+      <li class="breadcrumb-item active">Inscripciones</li>
+    </ol>
+  </nav>
+</div>
+
+<!-- Botón para nueva inscripción -->
+<div class="d-flex justify-content-start mb-3 mt-4">
+  <button class="btn btn-primary" (click)="abrirModal()">
+    <i class="bi bi-plus-circle"></i>&nbsp;&nbsp; Nueva Inscripción
+  </button>
+</div>
+
+<div class="col-12">
+  <div class="card recent-sales overflow-auto">
+    <div class="card-body pt-3">
+      <!-- Tabla -->
+      <table class="table table-hover">
+        <thead class="text-center">
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Estudiante</th>
+            <th scope="col">Curso</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inscripcion of inscripciones | paginate: { itemsPerPage: limit, currentPage: page }">
+            <td class="text-center">{{ inscripcion.id }}</td>
+            <td class="text-center">{{ inscripcion.estudiante_ci }}</td>
+            <td class="text-center">{{ inscripcion.curso_id }}</td>
+            <td class="text-center">{{ inscripcion.fecha }}</td>
+            <td class="text-center">{{ inscripcion.descripcion }}</td>
+            <td class="text-center">
+                <button class="btn btn-sm btn-primary me-1" (click)="verInscripcion(inscripcion)">
+                <i class="bi bi-eye"></i>
+              </button>
+              <button class="btn btn-sm btn-warning me-1" (click)="editarInscripcion(inscripcion)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="eliminarInscripcion(inscripcion)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="inscripciones.length === 0">
+            <td colspan="6" class="text-center">No hay inscripciones registradas</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Paginación -->
+      <div *ngIf="inscripciones.length > 0" class="d-flex justify-content-end mt-3">
+        <pagination-controls
+          class="custom-pagination"
+          (pageChange)="page = $event"
+          previousLabel="Anterior"
+          nextLabel="Siguiente">
+        </pagination-controls>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form [formGroup]="inscripcionForm" (ngSubmit)="onSubmit()">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ isEditMode ? 'Editar Inscripción' : 'Nueva Inscripción' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="estudiante_ci" class="form-label">Estudiante</label>
+            <select formControlName="estudiante_ci" class="form-select" id="estudiante_ci">
+              <option *ngFor="let estudiante of estudiantes" [ngValue]="estudiante.ci">
+                {{ estudiante.nombreCompleto }} ({{ estudiante.ci }})
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="curso_id" class="form-label">Curso</label>
+            <select formControlName="curso_id" class="form-select" id="curso_id">
+              <option *ngFor="let curso of cursos" [ngValue]="curso.id">
+                {{ curso.nombre }} - {{ curso.Nivel }}
+              </option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="fecha" class="form-label">Fecha</label>
+            <input type="date" formControlName="fecha" class="form-control" id="fecha">
+          </div>
+
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea formControlName="descripcion" class="form-control" id="descripcion"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- Modal de Detalle de Inscripción -->
+<!-- Modal de Detalle de Inscripción -->
+<div class="modal" [ngStyle]="{ display: modalVerVisible ? 'block' : 'none' }">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">Detalle de Inscripción</h5>
+        <button type="button" class="btn-close" (click)="modalVerVisible = false"></button>
+      </div>
+      <div class="modal-body">
+        <h6 class="fw-bold">Datos de la Inscripción</h6>
+        <p><strong>ID:</strong> {{ inscripcionSeleccionada.id }}</p>
+        <p><strong>Descripción:</strong> {{ inscripcionSeleccionada.descripcion }}</p>
+        <p><strong>Fecha:</strong> {{ inscripcionSeleccionada.fecha }}</p>
+        <p><strong>CI Estudiante:</strong> {{ inscripcionSeleccionada.estudiante_ci }}</p>
+        <p><strong>ID Curso:</strong> {{ inscripcionSeleccionada.curso_id }}</p>
+
+        <hr>
+        <h6 class="fw-bold">Datos del Estudiante</h6>
+        <p><strong>Nombre:</strong> {{ estudianteSeleccionado.nombreCompleto }}</p>
+        <p><strong>Apoderado:</strong> {{ estudianteSeleccionado.apoderado }}</p>
+        <p><strong>Teléfono del apoderado:</strong> {{ estudianteSeleccionado.telefono }}</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="modalVerVisible = false">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
