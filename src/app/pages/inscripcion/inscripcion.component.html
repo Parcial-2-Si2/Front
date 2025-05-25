@@ -135,11 +135,10 @@
         <p><strong>Descripción:</strong> {{ inscripcionSeleccionada.descripcion }}</p>
         <p><strong>Fecha:</strong> {{ inscripcionSeleccionada.fecha }}</p>
         <p><strong>CI Estudiante:</strong> {{ inscripcionSeleccionada.estudiante_ci }}</p>
-        <p><strong>ID Curso:</strong> {{ inscripcionSeleccionada.curso_id }}</p>
-
-        <hr>
-        <h6 class="fw-bold">Datos del Estudiante</h6>
-        <p><strong>Nombre:</strong> {{ estudianteSeleccionado.nombreCompleto }}</p>
+        <p><strong>Nombre de estudiante:</strong> {{ estudianteSeleccionado.nombreCompleto }}</p>
+        <p><strong>Curso:</strong> {{ cursoSeleccionado?.nombre }}</p>
+        <p><strong>Turno:</strong> {{ cursoSeleccionado?.Turno }}</p>
+        <p><strong>Nivel:</strong> {{ cursoSeleccionado?.Nivel }}</p>
         <p><strong>Apoderado:</strong> {{ estudianteSeleccionado.apoderado }}</p>
         <p><strong>Teléfono del apoderado:</strong> {{ estudianteSeleccionado.telefono }}</p>
       </div>

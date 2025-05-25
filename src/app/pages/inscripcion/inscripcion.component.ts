@@ -26,6 +26,7 @@ export class InscripcionComponent implements OnInit {
   isEditMode = false;
   inscripcionSeleccionada!: Inscripcion;
   estudianteSeleccionado!: Estudiante;
+  cursoSeleccionado?: Curso;
   modalVerVisible = false;
   page = 1;
   limit = 10;
@@ -115,6 +116,14 @@ export class InscripcionComponent implements OnInit {
     },
     error: () => {
       console.error('Error al obtener los datos del estudiante');
+    }
+  });
+   this.cursoService.obtenerCursoPorId(inscripcion.curso_id).subscribe({
+    next: (curso) => {
+      this.cursoSeleccionado = curso;
+    },
+    error: () => {
+      console.error('Error al cargar curso');
     }
   });
 }
