@@ -79,4 +79,30 @@ export class EstudianteService {
       catchError(() => throwError(() => 'Error al subir imagen'))
     );
   }
+
+  filtrarEstudiantesPorDocenteMateriaCurso(
+  docente_ci: number,
+  materia_id: number,
+  curso_id: number
+): Observable<Estudiante[]> {
+  const params = {
+    docente_ci: docente_ci.toString(),
+    materia_id: materia_id.toString(),
+    curso_id: curso_id.toString()
+  };
+
+  const url = `${this.BASE_URL}Estudiantes/filtrar-estudiantes`;
+  const headers = new HttpHeaders({
+    'Authorization': `${localStorage.getItem(this.TOKEN_KEY) || ''}`,
+    'Accept': 'application/json'
+  });
+
+  return this.http.get<Estudiante[]>(url, { headers, params }).pipe(
+    catchError((error) => {
+      console.error('❌ Error al filtrar estudiantes:', error);
+      return throwError(() => 'Error al filtrar estudiantes');
+    })
+  );
+}
+
 }

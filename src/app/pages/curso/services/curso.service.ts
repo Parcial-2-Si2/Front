@@ -45,6 +45,19 @@ export class CursoService {
     );
   }
 
+  obtenerCursosPorDocente(docenteCI: number): Observable<Curso[]> {
+    const url = `${this.BASE_URL}Curso/CursoDocente/${docenteCI}`;
+    return this.http.get<Curso[]>(url, {
+      headers: this.getHeaders()
+    }).pipe(
+      catchError((error) => {
+        console.error('❌ Error al obtener cursos por docente:', error);
+        return throwError(() => new Error('Error al obtener cursos por docente'));
+      })
+    );
+  }
+
+
   guardarCurso(curso: Curso): Observable<Curso> {
     const url = `${this.BASE_URL}Curso/`;
     return this.http.post<Curso>(url, curso, { headers: this.getHeaders() }).pipe(

@@ -1,6 +1,7 @@
 import { Materia } from '../../materia/interfaces/materia.interfaces';
 import { Curso } from '../../curso/interfaces/curso.interface';
 
+
 export interface MateriaCurso {
   id?: number;
   anio: number;
@@ -9,4 +10,5 @@ export interface MateriaCurso {
 
   materia?: Materia;
   curso?: Curso;
+  
 }

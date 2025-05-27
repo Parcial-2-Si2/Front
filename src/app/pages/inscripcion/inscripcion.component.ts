@@ -108,25 +108,35 @@ export class InscripcionComponent implements OnInit {
   }
   verInscripcion(inscripcion: Inscripcion): void {
   this.inscripcionSeleccionada = inscripcion;
-  this.modalVerVisible = true;
+
+  let estudianteCargado = false;
+  let cursoCargado = false;
 
   this.estudianteService.obtenerPorCI(inscripcion.estudiante_ci).subscribe({
     next: (estudiante) => {
       this.estudianteSeleccionado = estudiante;
+      estudianteCargado = true;
+      this.mostrarModalSiListo(estudianteCargado, cursoCargado);
     },
-    error: () => {
-      console.error('Error al obtener los datos del estudiante');
-    }
+    error: () => { console.error('Error al obtener los datos del estudiante'); }
   });
-   this.cursoService.obtenerCursoPorId(inscripcion.curso_id).subscribe({
+
+  this.cursoService.obtenerCursoPorId(inscripcion.curso_id).subscribe({
     next: (curso) => {
       this.cursoSeleccionado = curso;
+      cursoCargado = true;
+      this.mostrarModalSiListo(estudianteCargado, cursoCargado);
     },
-    error: () => {
-      console.error('Error al cargar curso');
-    }
+    error: () => { console.error('Error al cargar curso'); }
   });
 }
+
+mostrarModalSiListo(estudianteCargado: boolean, cursoCargado: boolean): void {
+  if (this.estudianteSeleccionado && this.cursoSeleccionado) {
+    this.modalVerVisible = true;
+  }
+}
+
 
 
   eliminarInscripcion(inscripcion: Inscripcion): void {
@@ -152,4 +162,16 @@ export class InscripcionComponent implements OnInit {
   onSubmit(): void {
     this.isEditMode ? this.actualizarInscripcion() : this.guardarInscripcion();
   }
+  getNombreEstudiante(ci: number): string {
+  const estudiante = this.estudiantes.find(e => e.ci.toString() === ci.toString());
+  return estudiante ? estudiante.nombreCompleto : 'Estudiante no encontrado';
+}
+
+
+getDescripcionCurso(id: number): string {
+  const curso = this.cursos.find(c => c.id === id);
+  return curso
+    ? `${curso.nombre}` : 'Curso no encontrado';
+}
+
 }

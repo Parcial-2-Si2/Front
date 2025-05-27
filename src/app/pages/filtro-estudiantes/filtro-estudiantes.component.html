@@ -1,0 +1,63 @@
+<!-- Información superior -->
+<div class="mb-4" *ngIf="materiaSeleccionada && cursoSeleccionado && docenteSeleccionado">
+  <h4><strong>Docente:</strong> {{ docenteSeleccionado.nombreCompleto }}</h4>
+  <p><strong>Materia:</strong> {{ materiaSeleccionada.nombre }}</p>
+  <p><strong>Curso:</strong> {{ cursoSeleccionado.nombre }}</p>
+  <p><strong>Fecha:</strong> {{ fechaHoy | date:'yyyy-MM-dd' }}</p>
+</div>
+
+<!-- Tabla de asistencia -->
+<table class="table table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>CI</th>
+      <th>Nombre</th>
+      <th>Asistió</th>
+      <th>Falta</th>
+      <th>Licencia</th>
+      <th>Justificación</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let estudiante of estudiantesFiltrados">
+      <td>{{ estudiante.ci }}</td>
+      <td>{{ estudiante.nombreCompleto }}</td>
+      <td><input type="checkbox" [(ngModel)]="estudiante.asistio" /></td>
+      <td><input type="checkbox" [(ngModel)]="estudiante.falta" /></td>
+      <td><input type="checkbox" [(ngModel)]="estudiante.licencia" (change)="abrirJustificacionModal(estudiante)" /></td>
+      <td>
+        <button *ngIf="estudiante.licencia" class="btn btn-sm btn-info" (click)="abrirJustificacionModal(estudiante)">
+          Ver / Editar
+        </button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Modal de justificación -->
+<div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Justificación de Licencia</h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+      <div *ngIf="estudianteSeleccionado">
+        <label for="justificacion">Justificación:</label>
+        <textarea
+            id="justificacion"
+            class="form-control"
+            [(ngModel)]="estudianteSeleccionado.justificacion">
+        </textarea>
+        </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+        <button class="btn btn-primary" (click)="guardarJustificacion()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Botón volver -->
+<div class="mt-3">
+  <button class="btn btn-secondary" (click)="volver()">Volver</button>
+</div>

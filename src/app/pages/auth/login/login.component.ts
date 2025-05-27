@@ -5,6 +5,7 @@ import { ValidatorsService } from '../../../../shared/services/validators.servic
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { NavigationService } from '../../../../shared/services/navigation.service';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
+    private navigationService: NavigationService
   ) {}
 
   ngOnInit(): void {
@@ -46,30 +48,39 @@ export class LoginComponent {
     this.returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard';
   }
 
-  login() {
-    if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched();
-      return;
-    }
-    this.loading = true;
-    
-    const gmail: string = this.loginForm.value.email.trim();
-    const contrasena: string = this.loginForm.value.password.trim();
-    
-    this.authService.login({gmail, contrasena}).subscribe({
-      next: (response) => {
-        console.log('Login response:', response);
-        this.loading = false;
-        this.router.navigate([this.returnUrl]); 
-        this.alertServive.toast('Usuario autenticado con éxito', 'success');
-      },
-      error: (error) => {
-        this.loading = false; 
-        console.error('Error en el login:', error);
-        this.alertServive.toast('Credenciales inválidas. Intente nuevamente.', 'error');
-      },
-    });
+login() {
+  if (this.loginForm.invalid) {
+    this.loginForm.markAllAsTouched();
+    return;
   }
+  this.loading = true;
+
+  const gmail: string = this.loginForm.value.email.trim();
+  const contrasena: string = this.loginForm.value.password.trim();
+
+  this.authService.login({ gmail, contrasena }).subscribe({
+    next: (response) => {
+      console.log('Login response:', response);
+      this.loading = false;
+
+      const usuario = response.Usuario;
+      
+      if (usuario) {
+        this.navigationService.setUsuario(usuario);
+      }
+
+ // ✅ Aquí guardas el token para que funcione el header de autorización
+ 
+      this.router.navigate([this.returnUrl]);
+      this.alertServive.toast('Usuario autenticado con éxito', 'success');
+    },
+    error: (error) => {
+      this.loading = false;
+      console.error('Error en el login:', error);
+      this.alertServive.toast('Credenciales inválidas. Intente nuevamente.', 'error');
+    },
+  });
+}
 
   register(){
     return this.router.navigate(['/authentication/register']);

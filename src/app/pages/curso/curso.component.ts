@@ -36,6 +36,7 @@ export class CursoComponent implements OnInit {
   isEditMode = false;
   modalVisible = false;
   curso!: Curso;
+  docenteCI: number | null = null;
 
   constructor(
     private router: Router, 
@@ -47,28 +48,68 @@ export class CursoComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.cursoService.cursos$.subscribe((data) => {
-      this.cursos = data;
-      this.todosLosCursos = data;
-    });
-
     this.cursoForm = this.fb.group({
-      nombre: ['', Validators.required],
-      Paralelo: ['', Validators.required],
-      Turno: ['', Validators.required],
-      Nivel: ['', Validators.required],
-      descripcion: [''],
-    });
+    nombre: ['', Validators.required],
+    Paralelo: ['', Validators.required],
+    Turno: ['', Validators.required],
+    Nivel: ['', Validators.required],
+    descripcion: [''],
+  });
 
-    this.obtenerCursos();
+  this.obtenerCursos();
+    if (this.docenteCI) {
+      // 🔹 Mostrar cursos solo del docente
+      this.cursoService.obtenerCursosPorDocente(this.docenteCI).subscribe({
+        next: (data) => {
+          this.cursos = data;
+          this.todosLosCursos = data;
+        },
+        error: (err) => this.alertsService.toast(err, 'error'),
+      });
+    } else {
+      // 🔹 Mostrar todos los cursos si no es docente
+      this.cursoService.cursos$.subscribe((data) => {
+        this.cursos = data;
+        this.todosLosCursos = data;
+      });
+
+      this.obtenerCursos();
+    }
   }
 
   obtenerCursos(): void {
+  const docente = this.navigationService.getUsuario();
+  const esDocente = docente?.esDocente ?? false;
+
+  if (esDocente) {
+    const ci = Number(docente?.ci);
+    if (isNaN(ci)) {
+      this.alertsService.toast('CI del docente no válido', 'error');
+      return;
+    }
+
+    this.cursoService.obtenerCursosPorDocente(ci).subscribe({
+      next: (data) => {
+        this.cursos = data;
+        this.todosLosCursos = data;
+      },
+      error: (err) => {
+        this.alertsService.toast('Error al cargar cursos del docente', 'error');
+      },
+    });
+  } else {
     this.cursoService.obtenerCursos().subscribe({
-      next: () => {},
-      error: (err) => this.alertsService.toast(err, 'error'),
+      next: (data) => {
+        this.cursos = data;
+        this.todosLosCursos = data;
+      },
+      error: (err) => {
+        this.alertsService.toast('Error al cargar todos los cursos', 'error');
+      },
     });
   }
+}
+
 
   changeLimit(event: any): void {
     this.limit = +event.target.value;
@@ -84,30 +125,26 @@ export class CursoComponent implements OnInit {
     this.page = 1;
   }
 
- guardarCurso(): void {
-  if (this.cursoForm.invalid) {
-    this.cursoForm.markAllAsTouched();
-    return;
+  guardarCurso(): void {
+    if (this.cursoForm.invalid) {
+      this.cursoForm.markAllAsTouched();
+      return;
+    }
+
+    const nuevoCurso: Curso = this.cursoForm.value;
+
+    this.cursoService.guardarCurso(nuevoCurso).subscribe({
+      next: () => {
+        this.alertsService.toast('Curso guardado con éxito', 'success');
+        this.obtenerCursos();
+        this.cerrarModal();
+      },
+      error: (err) => {
+        console.error('Error guardando curso:', err);
+        this.alertsService.toast(err, 'error');
+      },
+    });
   }
-
-  const nuevoCurso: Curso = this.cursoForm.value;
-
-  console.log(nuevoCurso); // 🧪 verifica aquí que los nombres estén correctos
-
-  this.cursoService.guardarCurso(nuevoCurso).subscribe({
-    next: () => {
-      this.alertsService.toast('Curso guardado con éxito', 'success');
-      this.obtenerCursos();
-      this.cerrarModal();
-    },
-    error: (err) => {
-      console.error('Error guardando curso:', err);
-      this.alertsService.toast(err, 'error');
-    },
-  });
-}
-
-
 
   editarCurso(curso: Curso): void {
     this.curso = curso;
@@ -175,8 +212,7 @@ export class CursoComponent implements OnInit {
   }
 
   verDetalle(curso: Curso): void {
-      // Navegar a la ruta de detalle del docente
-      this.navigationService.setOrigen('curso');
-      this.router.navigate(['/dashboard/materia-curso', curso.id]);
+    this.navigationService.setOrigen('curso');
+    this.router.navigate(['/dashboard/materia-curso', curso.id]);
   }
 }

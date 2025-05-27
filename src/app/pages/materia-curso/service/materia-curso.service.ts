@@ -24,44 +24,59 @@ export class MateriaCursoService {
     });
   }
 
+  // ✅ GET todas las asignaciones
   obtenerAsignaciones(): Observable<MateriaCurso[]> {
-    const url = `${this.BASE_URL}MateriasCurso/`;
+    const url = `${this.BASE_URL}MateriasCurso/`;  // ← sin 's' final
     return this.http.get<MateriaCurso[]>(url, { headers: this.getHeaders() }).pipe(
       map(res => res.sort((a, b) => a.id! - b.id!)),
       tap(asignaciones => this._asignacionesSubject.next(asignaciones)),
       catchError(err => {
         console.error('❌ Error al obtener asignaciones:', err);
-        return throwError(() => 'Error al obtener asignaciones');
+        return throwError(() => new Error('Error al obtener asignaciones'));
       })
     );
   }
 
+  // ✅ POST crear una nueva asignación
   guardarAsignacion(asignacion: MateriaCurso): Observable<MateriaCurso> {
     const url = `${this.BASE_URL}MateriasCurso/`;
     return this.http.post<MateriaCurso>(url, asignacion, { headers: this.getHeaders() }).pipe(
       catchError(err => {
         console.error('❌ Error al guardar asignación:', err);
-        return throwError(() => 'Error al guardar asignación');
+        return throwError(() => new Error('Error al guardar asignación'));
       })
     );
   }
 
-  actualizarAsignacion(id: number, asignacion: MateriaCurso): Observable<MateriaCurso> {
+  // ✅ GET asignación por ID
+  obtenerAsignacionPorId(id: number): Observable<MateriaCurso> {
     const url = `${this.BASE_URL}MateriasCurso/${id}`;
-    return this.http.put<MateriaCurso>(url, asignacion, { headers: this.getHeaders() }).pipe(
-      catchError(err => {
-        console.error('❌ Error al actualizar asignación:', err);
-        return throwError(() => 'Error al actualizar asignación');
+    return this.http.get<MateriaCurso>(url, { headers: this.getHeaders() }).pipe(
+      catchError(error => {
+        console.error('❌ Error al obtener asignación por ID:', error);
+        return throwError(() => new Error('Error al obtener asignación'));
       })
     );
   }
 
+  // ✅ PUT actualizar asignación
+  actualizarAsignacion(id: number, data: MateriaCurso): Observable<MateriaCurso> {
+    const url = `${this.BASE_URL}MateriasCurso/${id}`;
+    return this.http.put<MateriaCurso>(url, data, { headers: this.getHeaders() }).pipe(
+      catchError(error => {
+        console.error('❌ Error al actualizar asignación:', error);
+        return throwError(() => new Error('Error al actualizar asignación'));
+      })
+    );
+  }
+
+  // ✅ DELETE eliminar asignación
   eliminarAsignacion(id: number): Observable<any> {
     const url = `${this.BASE_URL}MateriasCurso/${id}`;
     return this.http.delete(url, { headers: this.getHeaders() }).pipe(
       catchError(err => {
         console.error('❌ Error al eliminar asignación:', err);
-        return throwError(() => 'Error al eliminar asignación');
+        return throwError(() => new Error('Error al eliminar asignación'));
       })
     );
   }

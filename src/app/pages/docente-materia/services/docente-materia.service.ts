@@ -72,15 +72,12 @@ private getHeaders(): HttpHeaders {
     );
   }
 
-  buscarPorDocenteCI(ci: number): Observable<DocenteMateria[]> {
-    const url = `${this.BASE_URL}DocenteMateria/buscar/${ci}`;
-    console.log('📤 Enviando solicitud con CI:', ci, 'Tipo:', typeof ci);
-    return this.http.get<DocenteMateria[]>(url, {
-      headers: this.getHeaders()
-    }).pipe(
+   obtenerAsignacionesPorDocente(docente_ci: number): Observable<DocenteMateria[]> {
+    const url = `${this.BASE_URL}DocenteMateria/buscar/${docente_ci}`;
+    return this.http.get<DocenteMateria[]>(url, { headers: this.getHeaders() }).pipe(
       catchError((error) => {
-        console.error(' Error al buscar asignaciones por CI:', error);
-        return throwError(() => 'Error al buscar asignaciones por CI');
+        console.error('❌ Error al obtener asignaciones por docente:', error);
+        return throwError(() => new Error('Error al obtener asignaciones'));
       })
     );
   }

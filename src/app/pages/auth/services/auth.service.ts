@@ -69,7 +69,7 @@ export class AuthService {
   }
 */
 login(credentials: LoginRequest): Observable<LoginResponse> {
-  const url = `${this.BASE_URL}/auth/login`;
+  const url = `${this.BASE_URL}auth/login`;
 
   return this.http.post<LoginResponse>(url, credentials).pipe(
     map((response) => {

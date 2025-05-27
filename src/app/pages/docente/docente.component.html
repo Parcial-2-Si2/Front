@@ -10,7 +10,7 @@
 
 <!-- Botón para agregar nuevo -->
 <div class="d-flex justify-content-start mb-3 mt-4">
-  <button class="btn btn-primary" (click)="abrirModal()">
+  <button class="btn btn-danger" (click)="abrirModal()">
     <i class="bi bi-plus-circle"></i>&nbsp;&nbsp; Nuevo Usuario
   </button>
 </div>
@@ -70,7 +70,7 @@
             <td class="text-center">
               <button
               *ngIf="docente.esDocente"
-                class="btn btn-sm btn-primary me-1" aria-placeholder="asignar materia"
+                class="btn btn-sm btn-primary me-1" placeholder="asignar materia"
                 (click)="verDetalle(docente)"
               >
                 <i class="bi bi-clipboard-minus"></i>

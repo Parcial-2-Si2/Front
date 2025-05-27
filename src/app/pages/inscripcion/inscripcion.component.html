@@ -33,8 +33,14 @@
         <tbody>
           <tr *ngFor="let inscripcion of inscripciones | paginate: { itemsPerPage: limit, currentPage: page }">
             <td class="text-center">{{ inscripcion.id }}</td>
-            <td class="text-center">{{ inscripcion.estudiante_ci }}</td>
-            <td class="text-center">{{ inscripcion.curso_id }}</td>
+            <td class="text-center">
+        {{ getNombreEstudiante(inscripcion.estudiante_ci) }}
+      </td>
+
+      <!-- Mostrar curso formateado -->
+      <td class="text-center">
+        {{ getDescripcionCurso(inscripcion.curso_id) }}
+      </td>
             <td class="text-center">{{ inscripcion.fecha }}</td>
             <td class="text-center">{{ inscripcion.descripcion }}</td>
             <td class="text-center">
@@ -122,7 +128,9 @@
 </div>
 <!-- Modal de Detalle de Inscripción -->
 <!-- Modal de Detalle de Inscripción -->
-<div class="modal" [ngStyle]="{ display: modalVerVisible ? 'block' : 'none' }">
+<div class="modal"
+     *ngIf="inscripcionSeleccionada && estudianteSeleccionado?.ci && cursoSeleccionado?.id"
+     [ngStyle]="{ display: modalVerVisible ? 'block' : 'none' }">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

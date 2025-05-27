@@ -8,35 +8,35 @@
   </nav>
 </div>
 
-<!-- Sección de información del curso -->
- <div class="card mb-4">
+<!-- Información del curso -->
+<div class="card mb-4">
   <div class="card-body">
-    <h5 class="card-title">Información del Docente</h5>
-<div *ngIf="cursoSeleccionado" class="mb-4">
-  <h5><strong>Curso:</strong> {{ cursoSeleccionado.nombre }}</h5>
-  <p><strong>Descripción:</strong> {{ cursoSeleccionado.descripcion }}</p>
+    <h5 class="card-title">Información del Curso</h5>
+    <div *ngIf="cursoSeleccionado" class="mb-4">
+      <h5><strong>Curso:</strong> {{ cursoSeleccionado.nombre }}</h5>
+      <p><strong>Descripción:</strong> {{ cursoSeleccionado.descripcion }}</p>
+    </div>
+
+    <!-- ✅ Mostrar solo si el usuario NO es docente -->
+    <div *ngIf="!isDocente" class="mb-3 d-flex align-items-end">
+      <div class="me-3">
+        <label for="materia" class="form-label">Seleccionar materia:</label>
+        <select class="form-select" [(ngModel)]="materiaSeleccionadaId">
+          <option [ngValue]="null">-- Selecciona una materia --</option>
+          <option *ngFor="let materia of todasLasMaterias" [ngValue]="materia.id">
+            {{ materia.nombre }} ({{ materia.codigo }})
+          </option>
+        </select>
+      </div>
+      <div class="me-3">
+        <label for="anio" class="form-label">Año:</label>
+        <input type="number" class="form-control" [(ngModel)]="anioAsignacion" />
+      </div>
+      <button class="btn btn-success" (click)="asignarMateria()">Asignar</button>
+    </div>
+  </div>
 </div>
 
-
-<!-- Asignar materia -->
-<div class="mb-3 d-flex align-items-end">
-  <div class="me-3">
-    <label for="materia" class="form-label">Seleccionar materia:</label>
-    <select class="form-select" [(ngModel)]="materiaSeleccionadaId">
-      <option [ngValue]="null">-- Selecciona una materia --</option>
-      <option *ngFor="let materia of todasLasMaterias" [ngValue]="materia.id">
-        {{ materia.nombre }}
-      </option>
-    </select>
-  </div>
-  <div class="me-3">
-    <label for="anio" class="form-label">Año:</label>
-    <input type="number" class="form-control" [(ngModel)]="anioAsignacion" />
-  </div>
-  <button class="btn btn-success" (click)="asignarMateria()">Asignar</button>
-</div>
-  </div>
- </div>
 <!-- Tabla de materias asignadas -->
 <div class="card">
   <div class="card-body">
@@ -52,11 +52,25 @@
       </thead>
       <tbody>
         <tr *ngFor="let asignacion of materiasAsignadas">
-          <td>{{ asignacion.id }}</td>
-          <td>{{ asignacion.materia?.nombre }}</td>
-          <td>{{ asignacion.anio }}</td>
-          <td>
-            <button class="btn btn-sm btn-danger" (click)="eliminarAsignacion(asignacion.id!)">
+          <td class="text-center">{{ asignacion.id }}</td>
+          <td class="text-center">
+            {{ asignacion.materia?.nombre }} ({{ asignacion.materia?.codigo }})
+          </td>
+          <td class="text-center">{{ asignacion.anio }}</td>
+          <td class="text-center">
+            <button
+              class="btn btn-sm btn-primary me-1"
+              *ngIf="isDocente && asignacion.materia"
+              (click)="verLista(asignacion)"
+            >
+              <i class="bi bi-clipboard-minus"></i>
+            </button>
+            <!-- Mostrar eliminar solo si NO es docente -->
+            <button
+              *ngIf="!isDocente"
+              class="btn btn-sm btn-danger"
+              (click)="eliminarAsignacion(asignacion.id!)"
+            >
               <i class="bi bi-trash"></i>
             </button>
           </td>

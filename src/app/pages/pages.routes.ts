@@ -6,6 +6,7 @@ import { MateriaComponent } from "./materia/materia.component";
 import { DocenteMateriaComponent } from "./docente-materia/docente-materia.component";
 import { InscripcionComponent } from "./inscripcion/inscripcion.component";
 import { MateriaCursoComponent } from "./materia-curso/materia-curso.component";
+import { FiltroEstudiantesComponent } from "./filtro-estudiantes/filtro-estudiantes.component";
 //import { DashboardComponent } from "./dashboard/dashboard.component";
 
 
@@ -46,6 +47,11 @@ export const PagesRoutes: Routes = [
     path: 'materia-curso/:id',
     component: MateriaCursoComponent,
   },
+  {
+  path: 'filtrar-estudiantes',
+  component: FiltroEstudiantesComponent,
+}
+
  // {
   //  path: 'reportes',
   //  loadChildren: () => import('./reportes/reportes.routes').then(m => m.ReportesRoutes),

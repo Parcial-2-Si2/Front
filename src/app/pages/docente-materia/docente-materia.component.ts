@@ -6,9 +6,10 @@ import { DocenteMateria } from './interfaces/docenteMateria.interface';
 import { Materia } from '../materia/interfaces/materia.interfaces';
 import { Docente } from '../docente/interfaces/docente.interface';
 import { FormsModule } from '@angular/forms';
-import { NavigationService } from '../../shared/services/navigation.service';
+import { NavigationService } from '../../../shared/services/navigation.service';
 import { DocenteService } from '../docente/services/docentes.service';
 import { CommonModule } from '@angular/common'; 
+import { MateriaCurso } from '../materia-curso/interfaces/materiaCurso.interface';
 
 @Component({
   selector: 'app-docente-detalle',
@@ -25,6 +26,7 @@ export class DocenteMateriaComponent implements OnInit {
   materiaSeleccionadaId: number | null = null;
   editando = false;
   alertsService: any;
+  asignaciones: DocenteMateria[] = [];
 
   constructor(
   private route: ActivatedRoute,
@@ -36,11 +38,10 @@ export class DocenteMateriaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-  const ciParam = this.route.snapshot.paramMap.get('ci');
-  this.docenteCI = ciParam ? Number(ciParam) : 0;  // ← convierte string a number
+  this.docenteCI = Number(this.navigationService.getDocenteCI()); // ← convierte string a number
   this.obtenerDocente();
   this.obtenerMaterias();
-  this.obtenerAsignaciones();
+  this.obtenerAsignacionesPorDocente();
 }
 
   obtenerMaterias(): void {
@@ -70,21 +71,16 @@ export class DocenteMateriaComponent implements OnInit {
   });
 }
 
-  obtenerAsignaciones(): void {
-  console.log('Buscando asignaciones para CI:', this.docenteCI);
-  this.dmService.buscarPorDocenteCI(this.docenteCI).subscribe({
-    next: (asignaciones) => {
-      this.materiasAsignadas = asignaciones;
+  obtenerAsignacionesPorDocente(): void {
+  this.dmService.obtenerAsignacionesPorDocente(this.docenteCI).subscribe({
+    next: (data) => {
+      this.asignaciones = data;
     },
     error: (err) => {
-      console.error('❌ Error al cargar asignaciones:', err);
-      if (err.status === 422) {
-        this.alertsService.toast('CI inválido o sin formato correcto', 'error');
-      }
+      console.error('Error cargando asignaciones:', err);
     }
   });
-
-  }
+}
 
  asignarMateria(): void {
   if (!this.materiaSeleccionadaId) return;
@@ -100,7 +96,7 @@ export class DocenteMateriaComponent implements OnInit {
 
   this.dmService.guardarAsignacion(asignacion).subscribe({
     next: () => {
-      this.obtenerAsignaciones();
+      this.obtenerAsignacionesPorDocente();
       this.materiaSeleccionadaId = null;
     },
     error: (err) => {
@@ -113,7 +109,7 @@ export class DocenteMateriaComponent implements OnInit {
 
   eliminarAsignacion(id: number): void {
     this.dmService.eliminarAsignacion(id).subscribe({
-      next: () => this.obtenerAsignaciones(),
+      next: () => this.obtenerAsignacionesPorDocente(),
       error: () => console.error('Error al eliminar asignación')
     });
   }
