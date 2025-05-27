@@ -7,6 +7,7 @@ import { DocenteMateriaComponent } from "./docente-materia/docente-materia.compo
 import { InscripcionComponent } from "./inscripcion/inscripcion.component";
 import { MateriaCursoComponent } from "./materia-curso/materia-curso.component";
 import { FiltroEstudiantesComponent } from "./filtro-estudiantes/filtro-estudiantes.component";
+import { GestionComponent } from "./gestion/gestion.component";
 //import { DashboardComponent } from "./dashboard/dashboard.component";
 
 
@@ -50,7 +51,11 @@ export const PagesRoutes: Routes = [
   {
   path: 'filtrar-estudiantes',
   component: FiltroEstudiantesComponent,
-}
+  },
+  {
+  path: 'gestion',
+  component: GestionComponent,
+  }
 
  // {
   //  path: 'reportes',

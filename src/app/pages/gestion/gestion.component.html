@@ -1,0 +1,116 @@
+<!-- Título y navegación -->
+<div class="pagetitle">
+  <h1>Gestiones</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Home</a></li>
+      <li class="breadcrumb-item active">Gestiones</li>
+    </ol>
+  </nav>
+</div>
+
+<!-- Botón Nueva Gestión -->
+<div class="d-flex justify-content-start mb-3 mt-4">
+  <button class="btn btn-primary" (click)="abrirModal()">
+    <i class="bi bi-plus-circle"></i>&nbsp;&nbsp; Nueva Gestión
+  </button>
+</div>
+
+<!-- Tarjeta principal con paginación y buscador -->
+<div class="col-12">
+  <div class="card recent-sales overflow-auto">
+    <div class="card-body pt-3">
+      <!-- Paginación y buscador -->
+      <div class="d-flex justify-content-between mb-3">
+        <div class="d-flex align-items-center">
+          <span class="me-2">Mostrando</span>
+          <select class="form-select" (change)="changeLimit($event)">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span class="ms-2 text-nowrap">registros por página</span>
+        </div>
+
+        <!-- Campo de búsqueda -->
+        <div class="d-flex align-items-center">
+            <input
+                type="text"
+                class="form-control"
+                placeholder="Buscar..."
+                (input)="searchTable($event)"
+            />
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <table class="table table-hover">
+        <thead class="text-center">
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Año</th>
+            <th scope="col">Periodo</th>
+            <th scope="col">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let gestion of gestiones | paginate: { itemsPerPage: limit, currentPage: page }">
+            <td class="text-center">{{ gestion.id }}</td>
+            <td class="text-center">{{ gestion.anio }}</td>
+            <td class="text-center">{{ gestion.periodo }}</td>
+            <td class="text-center">
+              <button class="btn btn-sm btn-warning me-1" (click)="editarGestion(gestion)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-danger" (click)="eliminarGestion(gestion)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="gestiones.length === 0">
+            <td colspan="4" class="text-center">No se encontraron registros</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Control de paginación -->
+      <div class="d-flex justify-content-end mt-3" *ngIf="gestiones.length > 0">
+        <pagination-controls (pageChange)="page = $event" previousLabel="Anterior" nextLabel="Siguiente"></pagination-controls>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Crear/Editar Gestión -->
+<div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold">
+          {{ isEditMode ? 'Editar Gestión' : 'Crear Nueva Gestión' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+      <form [formGroup]="gestionForm" (ngSubmit)="onSubmit()">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="anio" class="form-label">Año:</label>
+            <input type="number" formControlName="anio" class="form-control" id="anio" />
+          </div>
+          <div class="mb-3">
+            <label for="periodo" class="form-label">Periodo:</label>
+            <input type="text" formControlName="periodo" class="form-control" id="periodo" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary">
+            {{ isEditMode ? 'Actualizar' : 'Guardar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+

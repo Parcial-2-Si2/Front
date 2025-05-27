@@ -49,19 +49,24 @@ export class SidebarComponent {
       icon: 'bi bi-book',
       isExpanded: false,
     },
-    
     {
       label: 'Gestiones',
+      route: '/dashboard/gestion',
+      icon: 'bi bi-book',
+      isExpanded: false,
+    },
+    {
+      label: 'Evaluaciones',
       icon: 'bi bi-calendar-event',
       children: [
         {
-          label: 'Ventas',
-          route: '/dashboard/ventas',
+          label: 'Tipo de evaluacion',
+          route: '/dashboard/tipo-evaluacion',
           icon: 'bi bi-cart',
         },
         {
-          label: 'Cupones',
-          route: '/dashboard/cupones',
+          label: 'Evalucion integral',
+          route: '/dashboard/evaluacion-integral',
           icon: 'bi bi-ticket-perforated',
         },
         // {
@@ -69,11 +74,11 @@ export class SidebarComponent {
         //   route: '/dashboard/direcciones',
         //   icon: 'bi bi-geo-alt',
         // },
-        {
-          label: 'Reseñas',
-          route: '/dashboard/reviews',
+        /*{
+          label: 'Evaluaciones',
+          route: '/dashboard/evaluaciones',
           icon: 'bi bi-star',
-        }
+        }*/
       ],
     },
     /*
