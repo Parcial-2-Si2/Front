@@ -49,18 +49,9 @@ export class FiltroEstudiantesComponent implements OnInit {
   gestionSeleccionada!: Gestion | null;
   tipoEvaluacionSeleccionada: TipoEvaluacion | null = null;
   gestion_id!: number;
-  tipo_evaluacion_id!: number;
-  // Propiedades para el manejo dinámico de la tabla
+  tipo_evaluacion_id!: number;  // Propiedades para el manejo dinámico de la tabla
   esAsistenciaDiaria: boolean = true;
   descripcionEvaluacion: string = '';
-  
-  // Para debug: tracking del estado anterior
-  private estadoAnterior = {
-    descripcionEvaluacion: '',
-    gestion_id: 0,
-    tipo_evaluacion_id: 0,
-    fechaHoy: ''
-  };
   
   modalVisible: boolean = false;
   estudianteSeleccionado: any = null;
@@ -136,28 +127,12 @@ export class FiltroEstudiantesComponent implements OnInit {
       error: () => this.alertsService.toast('Error al cargar tipos de evaluación', 'error')
     });
   }  onGestionSeleccionada(gestion: Gestion | null): void {
-    console.log('=== onGestionSeleccionada ===');
-    console.log('Gestión seleccionada:', gestion);
-    console.log('gestion_id ACTUAL:', this.gestion_id);
     if (gestion?.id != null) {
-      const gestionAnterior = this.gestion_id;
       this.gestion_id = gestion.id;
-      console.log('gestion_id establecido a:', this.gestion_id);
-      if (gestionAnterior !== this.gestion_id) {
-        console.log('GESTIÓN CAMBIÓ');
-      } else {
-        console.log('GESTIÓN NO CAMBIÓ');
-      }
     } else {
-      console.log('Gestión inválida o null');
-      this.gestion_id = 0; // Reset to invalid value
+      this.gestion_id = 0;
     }
-  }  onTipoEvaluacionSeleccionada(tipo: TipoEvaluacion | null): void {
-    console.log('=== onTipoEvaluacionSeleccionada ===');
-    console.log('Tipo evaluación seleccionado:', tipo);
-    console.log('tipo_evaluacion_id ACTUAL:', this.tipo_evaluacion_id);
-    console.log('descripcionEvaluacion ANTES del cambio:', this.descripcionEvaluacion);
-    
+  }onTipoEvaluacionSeleccionada(tipo: TipoEvaluacion | null): void {
     if (tipo?.id != null) {
       // Solo limpiar datos si realmente cambió el tipo de evaluación
       const tipoAnterior = this.tipo_evaluacion_id;
@@ -166,27 +141,17 @@ export class FiltroEstudiantesComponent implements OnInit {
       this.tipo_evaluacion_id = tipo.id;
       this.esAsistenciaDiaria = tipo.id === 1;
       
-      console.log('tipo_evaluacion_id establecido a:', this.tipo_evaluacion_id);
-      console.log('esAsistenciaDiaria establecido a:', this.esAsistenciaDiaria);
-      
-      // Solo limpiar si cambió el tipo de evaluación Y si no es undefined/NaN el anterior
+      // Solo limpiar si cambió el tipo de evaluación
       if (tipoAnterior && tipoAnterior !== this.tipo_evaluacion_id) {
-        console.log('TIPO CAMBIÓ - Limpiando datos');
         this.limpiarDatosEstudiantes();
         // Solo resetear descripción si cambiamos de un tipo no-asistencia a asistencia o viceversa
         if (esAsistenciaAnterior !== this.esAsistenciaDiaria) {
           this.descripcionEvaluacion = '';
-          console.log('RESETEO descripcionEvaluacion por cambio de modo');
         }
-      } else {
-        console.log('TIPO NO CAMBIÓ O ES PRIMERA VEZ - Manteniendo datos');
       }
-      
-      console.log('descripcionEvaluacion DESPUÉS:', this.descripcionEvaluacion);
     } else {
-      console.log('Tipo de evaluación inválido o null');
-      this.tipo_evaluacion_id = 0; // Reset to invalid value
-      this.esAsistenciaDiaria = true; // Default
+      this.tipo_evaluacion_id = 0;
+      this.esAsistenciaDiaria = true;
     }
   }
 
@@ -336,18 +301,6 @@ export class FiltroEstudiantesComponent implements OnInit {
   trackByCI(index: number, estudiante: any): any {
     return estudiante.ci;
   }  guardarEvaluacionIndividual(estudiante: any): void {
-    console.log('=== INICIO guardarEvaluacionIndividual ===');
-    console.log('Estudiante:', estudiante.nombreCompleto);
-    
-    // Capturar estado ANTES de cualquier operación
-    this.capturarEstadoAnterior();
-    
-    console.log('gestion_id:', this.gestion_id);
-    console.log('tipo_evaluacion_id:', this.tipo_evaluacion_id);
-    console.log('descripcionEvaluacion:', this.descripcionEvaluacion);
-    console.log('fechaHoy:', this.fechaHoy);
-    console.log('esAsistenciaDiaria:', this.esAsistenciaDiaria);
-
     if (!this.gestion_id || !this.tipo_evaluacion_id) {
       this.alertsService.toast('Debe seleccionar una gestión y tipo de evaluación', 'warning');
       return;
@@ -379,9 +332,6 @@ export class FiltroEstudiantesComponent implements OnInit {
       nota = estudiante.nota ?? 0;
     }
 
-    console.log('Descripcion calculada:', descripcion);
-    console.log('Nota calculada:', nota);
-
     const evaluacion: Evaluacion = {
       descripcion: descripcion,
       fecha: fechaActual,
@@ -392,80 +342,20 @@ export class FiltroEstudiantesComponent implements OnInit {
       tipo_evaluacion_id: this.tipo_evaluacion_id
     };
 
-    console.log('Objeto evaluacion a enviar:', evaluacion);
-
     const request$ = this.tipo_evaluacion_id === 1
       ? this.evaluacionService.guardarAsistencia(evaluacion)
       : this.evaluacionService.guardarEvaluacion(evaluacion);
 
     request$.subscribe({
       next: () => {
-        console.log('Evaluación guardada exitosamente');
-        console.log('Estado después del guardado:');
-        console.log('- gestion_id:', this.gestion_id);
-        console.log('- tipo_evaluacion_id:', this.tipo_evaluacion_id);
-        console.log('- descripcionEvaluacion:', this.descripcionEvaluacion);
-        console.log('- fechaHoy:', this.fechaHoy);
-        
-        // Verificar si algo cambió después del guardado
-        this.verificarCambiosPostGuardado();
-        
         this.alertsService.toast(`Evaluación guardada para ${estudiante.nombreCompleto}`, 'success');
       },
       error: (err) => {
-        console.log('Error al guardar evaluación:', err);
         if (err.status === 500) {
-          // Mensaje de advertencia cuando ocurre el 500 pero los datos posiblemente se guardaron
           this.alertsService.toast(`Error 500 pero posiblemente se guardó la evaluación de ${estudiante.nombreCompleto}`, 'warning');
         } else {
           this.alertsService.toast(`Error al guardar evaluación para ${estudiante.nombreCompleto}`, 'error');
         }
       }
-    });
-
-    console.log('=== FIN guardarEvaluacionIndividual ===');
-  }
-  // Método para trackear cambios en la descripción
-  onDescripcionChange(event: any): void {
-    console.log('=== onDescripcionChange ===');
-    console.log('Nueva descripción:', event.target.value);
-    console.log('descripcionEvaluacion actual:', this.descripcionEvaluacion);
-  }
-
-  // Método para capturar el estado antes de operaciones críticas
-  private capturarEstadoAnterior(): void {
-    this.estadoAnterior = {
-      descripcionEvaluacion: this.descripcionEvaluacion,
-      gestion_id: this.gestion_id,
-      tipo_evaluacion_id: this.tipo_evaluacion_id,
-      fechaHoy: this.fechaHoy
-    };
-    console.log('Estado anterior capturado:', this.estadoAnterior);
-  }
-
-  // Método para verificar cambios después del guardado
-  private verificarCambiosPostGuardado(): void {
-    const cambios: string[] = [];
-    
-    if (this.estadoAnterior.descripcionEvaluacion !== this.descripcionEvaluacion) {
-      cambios.push(`descripcionEvaluacion: "${this.estadoAnterior.descripcionEvaluacion}" -> "${this.descripcionEvaluacion}"`);
-    }
-    if (this.estadoAnterior.gestion_id !== this.gestion_id) {
-      cambios.push(`gestion_id: ${this.estadoAnterior.gestion_id} -> ${this.gestion_id}`);
-    }
-    if (this.estadoAnterior.tipo_evaluacion_id !== this.tipo_evaluacion_id) {
-      cambios.push(`tipo_evaluacion_id: ${this.estadoAnterior.tipo_evaluacion_id} -> ${this.tipo_evaluacion_id}`);
-    }
-    if (this.estadoAnterior.fechaHoy !== this.fechaHoy) {
-      cambios.push(`fechaHoy: "${this.estadoAnterior.fechaHoy}" -> "${this.fechaHoy}"`);
-    }
-    
-    if (cambios.length > 0) {
-      console.warn('⚠️ SE DETECTARON CAMBIOS DESPUÉS DEL GUARDADO:');
-      cambios.forEach(cambio => console.warn(`  - ${cambio}`));
-    } else {
-      console.log('✅ No se detectaron cambios después del guardado');
-    }
-  }
-
+    });  }
 }

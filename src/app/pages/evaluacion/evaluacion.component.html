@@ -1,34 +1,186 @@
-<div class="p-4">
-  <h2 class="text-xl font-bold mb-4">Lista de Evaluaciones</h2>
+<!-- Breadcrumb -->
+<div class="pagetitle">
+  <h1>Lista de Evaluaciones</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Home</a></li>
+      <li class="breadcrumb-item active">Evaluaciones</li>
+    </ol>
+  </nav>
+</div>
 
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-    <input [(ngModel)]="gestionFiltro" type="number" placeholder="Gestión ID" class="border p-2 rounded">
-    <input [(ngModel)]="materiaFiltro" type="number" placeholder="Materia ID" class="border p-2 rounded">
-    <input [(ngModel)]="cursoFiltro" type="number" placeholder="Curso ID" class="border p-2 rounded">
-    <input [(ngModel)]="nombreFiltro" type="text" placeholder="Buscar por nombre" class="border p-2 rounded">
+<!-- Filtros -->
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Filtros de Búsqueda</h5>
+    
+    <div class="row g-3">
+      <!-- Primera fila de filtros -->
+      <div class="col-md-3">
+        <label for="gestionFiltro" class="form-label">Gestión</label>        <select id="gestionFiltro" class="form-select" [(ngModel)]="gestionFiltro" (ngModelChange)="aplicarFiltros()" [disabled]="cargando">
+          <option [ngValue]="null">-- Todas las gestiones --</option>
+          <option *ngFor="let gestion of gestiones" [ngValue]="gestion.id">
+            {{ gestion.anio }} - {{ gestion.periodo }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-3">
+        <label for="materiaFiltro" class="form-label">Materia</label>        <select id="materiaFiltro" class="form-select" [(ngModel)]="materiaFiltro" (ngModelChange)="aplicarFiltros()">
+          <option [ngValue]="null">-- Todas las materias --</option>
+          <option *ngFor="let materia of materias" [ngValue]="materia.id">
+            {{ materia.nombre }}
+          </option>
+        </select>
+      </div>      <div class="col-md-3">
+        <label for="estudianteFiltro" class="form-label">Estudiante</label>
+        <input 
+          id="estudianteFiltro" 
+          type="text" 
+          class="form-control" 
+          [(ngModel)]="estudianteFiltro"
+          (ngModelChange)="aplicarFiltros()"
+          placeholder="Buscar por nombre o CI...">
+      </div>
+
+      <div class="col-md-3">
+        <label for="descripcionFiltro" class="form-label">Descripción</label>        <input 
+          id="descripcionFiltro" 
+          type="text" 
+          class="form-control" 
+          [(ngModel)]="descripcionFiltro"
+          (ngModelChange)="aplicarFiltros()"
+          placeholder="Buscar por descripción...">
+      </div>
+
+      <!-- Segunda fila de filtros -->
+      <div class="col-md-3">
+        <label for="fechaInicio" class="form-label">Fecha Inicio</label>        <input 
+          id="fechaInicio" 
+          type="date" 
+          class="form-control" 
+          [(ngModel)]="fechaInicioFiltro"
+          (ngModelChange)="aplicarFiltros()">
+      </div>
+
+      <div class="col-md-3">
+        <label for="fechaFin" class="form-label">Fecha Fin</label>        <input 
+          id="fechaFin" 
+          type="date" 
+          class="form-control" 
+          [(ngModel)]="fechaFinFiltro"
+          (ngModelChange)="aplicarFiltros()">
+      </div>
+
+      <div class="col-md-3">
+        <label for="limit" class="form-label">Registros por página</label>
+        <select id="limit" class="form-select" (change)="changeLimit($event)">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </div>      <div class="col-md-3 d-flex align-items-end">
+        <div class="btn-group w-100">
+          <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">
+            <i class="bi bi-search"></i> Aplicar
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="limpiarFiltros()">
+            <i class="bi bi-arrow-clockwise"></i> Limpiar
+          </button>
+          <button type="button" class="btn btn-info" (click)="cargarDatos()">
+            <i class="bi bi-arrow-repeat"></i> Recargar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+</div>
 
-  <div class="flex gap-2 mb-4">
-    <button (click)="aplicarFiltros()" class="bg-blue-500 text-white px-4 py-2 rounded">Aplicar</button>
-    <button (click)="limpiarFiltros()" class="bg-gray-500 text-white px-4 py-2 rounded">Limpiar</button>
+<!-- Tabla de resultados -->
+<div class="card">
+  <div class="card-body">    <h5 class="card-title">
+      Resultados 
+      <span class="badge bg-primary ms-2" *ngIf="!cargando">{{ evaluacionesFiltradas.length }}</span>
+      <span class="spinner-border spinner-border-sm ms-2" *ngIf="cargando" role="status" aria-hidden="true"></span>
+      <span class="ms-2" *ngIf="cargando">Cargando...</span>
+    </h5>
+
+    <!-- Tabla responsive -->
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Estudiante</th>
+            <th scope="col">CI</th>
+            <th scope="col">Materia</th>
+            <th scope="col">Gestión</th>
+            <th scope="col">Descripción</th>
+            <th scope="col">Nota</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let eva of evaluacionesFiltradas | paginate: { itemsPerPage: limit, currentPage: page }; 
+                      let i = index">
+            <td>{{ (page - 1) * limit + i + 1 }}</td>
+            <td>{{ eva.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>{{ eva.estudiante_nombre }}</td>
+            <td>{{ eva.estudiante_ci }}</td>
+            <td>{{ eva.materia_nombre }}</td>
+            <td>{{ eva.gestion_detalle }}</td>
+            <td>
+              <span class="badge bg-info">{{ eva.descripcion || 'Sin descripción' }}</span>
+            </td>
+            <td>
+              <span class="badge" 
+                    [ngClass]="{
+                      'bg-success': eva.nota >= 70,
+                      'bg-warning': eva.nota >= 51 && eva.nota < 70,
+                      'bg-danger': eva.nota < 51
+                    }">
+                {{ eva.nota }}
+              </span>
+            </td>
+          </tr>
+          
+          <!-- Mensaje cuando no hay resultados -->
+          <tr *ngIf="evaluacionesFiltradas.length === 0">
+            <td colspan="8" class="text-center py-4">
+              <div class="text-muted">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-2">No se encontraron evaluaciones con los filtros aplicados</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="d-flex justify-content-center mt-3" *ngIf="evaluacionesFiltradas.length > 0">
+      <pagination-controls 
+        (pageChange)="page = $event"
+        previousLabel="Anterior"
+        nextLabel="Siguiente">
+      </pagination-controls>
+    </div>
+
+    <!-- Información adicional -->
+    <div class="row mt-3" *ngIf="evaluacionesFiltradas.length > 0">
+      <div class="col-md-6">
+        <small class="text-muted">
+          Mostrando {{ (page - 1) * limit + 1 }} a 
+          {{ Math.min(page * limit, evaluacionesFiltradas.length) }} 
+          de {{ evaluacionesFiltradas.length }} registros
+        </small>
+      </div>
+      <div class="col-md-6 text-end">
+        <small class="text-muted">
+          Total de evaluaciones: {{ evaluaciones.length }}
+        </small>
+      </div>
+    </div>
   </div>
-
-  <table class="w-full border">
-    <thead>
-      <tr class="bg-gray-200">
-        <th class="p-2 border">Fecha</th>
-        <th class="p-2 border">Estudiante</th>
-        <th class="p-2 border">Descripción</th>
-        <th class="p-2 border">Nota</th>
-        <th class="p-2 border">Gestión</th>
-        <th class="p-2 border">Materia</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let eva of evaluacionesFiltradas">
-        <td class="p-2 border">{{ eva.fecha }}</td>
-     
-      </tr>
-    </tbody>
-  </table>
 </div>

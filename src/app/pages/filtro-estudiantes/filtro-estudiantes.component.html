@@ -61,8 +61,7 @@
           class="form-control"
           [(ngModel)]="descripcionEvaluacion"
           placeholder="Ingrese la descripción de la evaluación"
-          maxlength="255"
-          (input)="onDescripcionChange($event)">
+          maxlength="255">
       </div>
     </div>
   </div>
@@ -142,8 +141,7 @@
                 [(ngModel)]="estudiante.retraso"
                 (change)="onAsistenciaChange(estudiante, 'retraso')" />
             </td>
-            <td class="text-center">
-             <button 
+            <td class="text-center">              <button 
                 class="btn btn-sm btn-success me-1" 
                 (click)="guardarEvaluacionIndividual(estudiante)"
                 [disabled]="!gestionSeleccionada">
@@ -186,8 +184,7 @@
                 max="100"
                 step="1"
                 style="width: 80px; margin: 0 auto;" />
-            </td>            <td class="text-center">
-              <button 
+            </td>            <td class="text-center">              <button 
                 class="btn btn-sm btn-success me-1" 
                 (click)="guardarEvaluacionIndividual(estudiante)"
                 [disabled]="!gestionSeleccionada || !descripcionEvaluacion.trim()">

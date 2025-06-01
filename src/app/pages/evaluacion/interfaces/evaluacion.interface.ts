@@ -10,3 +10,11 @@ export interface Evaluacion {
   materia_id: number;
   gestion_id: number;
 }
+
+// Interfaz extendida para mostrar información relacionada
+export interface EvaluacionDetallada extends Evaluacion {
+  estudiante_nombre?: string;
+  materia_nombre?: string;
+  gestion_detalle?: string;
+  tipo_evaluacion_nombre?: string;
+}

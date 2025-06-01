@@ -73,9 +73,7 @@ export class TipoEvaluacionComponent implements OnInit {
 
   changeLimit(event: any): void {
     this.limit = event.target.value;
-  }
-
-  onSubmit(): void {
+  }  onSubmit(): void {
     if (this.tipoForm.invalid) {
       this.tipoForm.markAllAsTouched();
       return;
@@ -88,24 +86,26 @@ export class TipoEvaluacionComponent implements OnInit {
 
     if (this.isEditMode) {
       this.tipoService.actualizarTipoEvaluacion(this.tipoSeleccionado.id!, data).subscribe({
-        next: () => {
+        next: (response) => {
           this.alertsService.toast('Tipo de evaluación actualizado correctamente', 'success');
           this.cerrarModal();
           this.obtenerTipos();
         },
-        error: () => {
+        error: (error) => {
+          console.error('Error al actualizar tipo de evaluación:', error);
           this.alertsService.toast('Error al actualizar tipo de evaluación', 'error');
           this.disableLoading();
         }
       });
     } else {
       this.tipoService.guardarTipoEvaluacion(data).subscribe({
-        next: () => {
+        next: (response) => {
           this.alertsService.toast('Tipo de evaluación creado correctamente', 'success');
           this.cerrarModal();
           this.obtenerTipos();
         },
-        error: () => {
+        error: (error) => {
+          console.error('Error al crear tipo de evaluación:', error);
           this.alertsService.toast('Error al crear tipo de evaluación', 'error');
           this.disableLoading();
         }
@@ -130,13 +130,9 @@ export class TipoEvaluacionComponent implements OnInit {
         error: () => this.alertsService.toast('Error al eliminar tipo de evaluación', 'error'),
       });
     }
-  }
-
-  abrirModal(): void {
+  }  abrirModal(): void {
     this.modalVisible = true;
-  }
-
-  cerrarModal(): void {
+  }  cerrarModal(): void {
     this.modalVisible = false;
     this.tipoForm.reset();
     this.tipoForm.enable();
