@@ -14,7 +14,6 @@ import { EvaluacionComponent } from "./evaluacion/evaluacion.component";
 import { BoletinComponent } from "./boletin/boletin.component";
 import { EstimacionesComponent } from "./estimaciones/estimaciones.component";
 import { DashboardComponent } from "./dashboard/dashboard.component";
-//import { DashboardComponent } from "./dashboard/dashboard.component";
 
 
 export const PagesRoutes: Routes = [

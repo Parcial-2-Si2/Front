@@ -1,0 +1,120 @@
+/* Dashboard Component Styles */
+
+.dashboard-container {
+  padding: 20px;
+}
+
+.stats-card {
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+}
+
+.stats-icon {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.alert-card {
+  border-left: 4px solid;
+  border-radius: 5px;
+}
+
+.alert-card.alta {
+  border-left-color: #dc3545;
+}
+
+.alert-card.media {
+  border-left-color: #ffc107;
+}
+
+.alert-card.baja {
+  border-left-color: #17a2b8;
+}
+
+.materia-card {
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.materia-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.estudiante-item {
+  padding: 8px 12px;
+  margin: 4px 0;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  border-left: 3px solid #dee2e6;
+}
+
+.estudiante-item.top {
+  background-color: #d4edda;
+  border-left-color: #28a745;
+}
+
+.estudiante-item.bajo {
+  background-color: #f8d7da;
+  border-left-color: #dc3545;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.admin-card {
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.admin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.admin-card .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  min-height: 220px;
+  padding: 1.5rem;
+}
+
+.admin-card .btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-width: 100px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 10px;
+  }
+  
+  .stats-card {
+    margin-bottom: 15px;
+  }
+  
+  .admin-card .card-body {
+    min-height: 150px;
+  }
+}

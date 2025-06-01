@@ -1,193 +1,301 @@
 <div class="pagetitle">
-  <h1>Dashboard</h1>
+  <h1>Panel Principal</h1>
   <nav>
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="index.html">Home</a></li>
       <li class="breadcrumb-item active">Dashboard</li>
     </ol>
   </nav>
 </div>
-<!-- End Page Title -->
 
-<section class="section dashboard">
-  <div class="row">
-    <!-- Left side columns -->
-    <div class="col-lg-12">
-      <div class="row">
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Usuarios</h5>
+<!-- Indicador de carga -->
+<div *ngIf="cargandoDatos" class="d-flex justify-content-center mb-4">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
 
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-person-fill"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_admins }}</h6>
-                </div>
-              </div>
-            </div>
-          </div>
+<!-- Card de bienvenida -->
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">
+      <i class="bi bi-person-check me-2"></i>
+      Bienvenido al Sistema Educativo
+    </h5>
+    <p class="mb-1">
+      <strong>Rol:</strong> 
+      <span class="badge bg-primary ms-2" *ngIf="esDocente">Docente</span>
+      <span class="badge bg-success ms-2" *ngIf="!esDocente">Administrador</span>
+    </p>
+    <p class="mb-0" *ngIf="usuario">
+      <strong>Usuario:</strong> {{ usuario.nombre || usuario.ci }}
+      <span *ngIf="usuario.ci"> (CI: {{ usuario.ci }})</span>
+    </p>
+  </div>
+</div>
+
+<!-- Vista para Docente -->
+<div *ngIf="esDocente && !cargandoDatos">
+  
+  <!-- KPIs del Docente -->
+  <div class="row mb-4" *ngIf="estadisticasDocente">
+    <div class="col-md-3 mb-3">
+      <div class="card border-primary">
+        <div class="card-body text-center">
+          <i class="bi bi-people fs-2 text-primary"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasDocente.totalEstudiantes }}</h3>
+          <p class="text-muted mb-0">Total Estudiantes</p>
         </div>
-
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Clientes</h5>
-
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-people-fill"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_clientes }}</h6>
-                </div>
-              </div>
-            </div>
-          </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-success">
+        <div class="card-body text-center">
+          <i class="bi bi-journal-bookmark fs-2 text-success"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasDocente.totalMaterias }}</h3>
+          <p class="text-muted mb-0">Materias Asignadas</p>
         </div>
-        
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Categorías</h5>
-
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-tags-fill"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_categorias }}</h6>
-                </div>
-              </div>
-            </div>
-          </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-warning">
+        <div class="card-body text-center">
+          <i class="bi bi-calendar-check fs-2 text-warning"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasDocente.promedioAsistenciaGeneral }}%</h3>
+          <p class="text-muted mb-0">Asistencia Promedio</p>
         </div>
-
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Productos</h5>
-
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-box-seam"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_productos }}</h6>
-                </div>
-              </div>
-            </div>
-          </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-info">
+        <div class="card-body text-center">
+          <i class="bi bi-graph-up fs-2 text-info"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasDocente.promedioNotasGeneral }}</h3>
+          <p class="text-muted mb-0">Promedio General</p>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Marcas</h5>
-
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-patch-check-fill"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_marcas }}</h6>
-                </div>
-              </div>
-            </div>
-          </div>
+  <!-- Alertas del Docente -->
+  <div class="row mb-4" *ngIf="alertasDocente.length > 0">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Alertas Importantes
+          </h5>
         </div>
-
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Ventas</h5>
-
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-currency-dollar"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_ventas }}</h6>
-                </div>
+        <div class="card-body">
+          <div *ngFor="let alerta of alertasDocente" [ngClass]="getClaseAlerta(alerta.prioridad)" class="mb-2">
+            <div class="d-flex align-items-center">
+              <i [ngClass]="getIconoAlerta(alerta.tipo)" class="me-2"></i>
+              <div class="flex-grow-1">
+                <strong>{{ alerta.estudiante }}</strong>
+                <p class="mb-0">{{ alerta.descripcion }}</p>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Métodos de Pago</h5>
-
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-credit-card-fill"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_metodos_pago }}</h6>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Pagos</h5>
-
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-wallet-fill"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_pagos }}</h6>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-xxl-4 col-md-6">
-          <div class="card info-card sales-card">
-            <div class="card-body">
-              <h5 class="card-title">Reseñas</h5>
-
-              <div class="d-flex align-items-center">
-                <div
-                  class="card-icon rounded-circle d-flex align-items-center justify-content-center"
-                >
-                  <i class="bi bi-chat-dots-fill"></i>
-                </div>
-                <div class="ps-3">
-                  <h6>{{ datos?.total_resenas }}</h6>
-                </div>
-              </div>
+              <span class="badge" 
+                    [ngClass]="alerta.prioridad === 'alta' ? 'bg-danger' : alerta.prioridad === 'media' ? 'bg-warning' : 'bg-info'">
+                {{ alerta.prioridad | titlecase }}
+              </span>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- End Left side columns -->
-
-    <!-- End Right side columns -->
   </div>
-</section>
+
+  <!-- Materias del Docente -->
+  <div class="row">
+    <div class="col-lg-6 mb-4" *ngFor="let materia of materiasAsignadas">
+      <div class="card h-100 materia-card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">{{ materia.nombre }}</h5>
+          <span class="badge bg-secondary">{{ materia.curso.nombre }} - {{ materia.curso.turno }}</span>
+        </div>
+        <div class="card-body">
+          
+          <!-- Estadísticas de la materia -->
+          <div class="row mb-3">
+            <div class="col-6">
+              <div class="text-center">
+                <h6 class="text-muted">Estudiantes</h6>
+                <h4 class="text-primary">{{ materia.totalEstudiantes }}</h4>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="text-center">
+                <h6 class="text-muted">Asistencia</h6>
+                <h4 [ngClass]="getClaseAsistencia(materia.porcentajeAsistencia)">
+                  {{ materia.porcentajeAsistencia }}%
+                </h4>
+              </div>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-12">
+              <div class="text-center">
+                <h6 class="text-muted">Promedio de Notas</h6>
+                <h4 class="text-info">{{ materia.promedioNotas }}</h4>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top estudiantes -->
+          <div class="mb-3" *ngIf="materia.estudiantesTopRendimiento.length > 0">
+            <h6 class="text-success">
+              <i class="bi bi-trophy me-1"></i>
+              Mejores Estudiantes
+            </h6>
+            <div *ngFor="let estudiante of materia.estudiantesTopRendimiento" class="estudiante-item top">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ estudiante.nombre }}</strong>
+                  <small class="text-muted d-block">CI: {{ estudiante.ci }}</small>
+                </div>
+                <div class="text-end">
+                  <span [ngClass]="getClaseRendimiento(estudiante.promedio)">
+                    {{ estudiante.promedio }}
+                  </span>
+                  <small class="text-muted d-block">{{ estudiante.porcentajeAsistencia }}% asist.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estudiantes con bajo rendimiento -->
+          <div class="mb-3" *ngIf="materia.estudiantesBajoRendimiento.length > 0">
+            <h6 class="text-danger">
+              <i class="bi bi-exclamation-circle me-1"></i>
+              Requieren Atención
+            </h6>
+            <div *ngFor="let estudiante of materia.estudiantesBajoRendimiento" class="estudiante-item bajo">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ estudiante.nombre }}</strong>
+                  <small class="text-muted d-block">CI: {{ estudiante.ci }}</small>
+                </div>
+                <div class="text-end">
+                  <span [ngClass]="getClaseRendimiento(estudiante.promedio)">
+                    {{ estudiante.promedio }}
+                  </span>
+                  <small class="text-muted d-block">{{ estudiante.porcentajeAsistencia }}% asist.</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Acciones rápidas -->
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-primary"
+                    [routerLink]="['/dashboard/filtro-estudiantes']"
+                    [queryParams]="{ docente_ci: ciDocente, materia_id: materia.id, curso_id: materia.curso.id }">
+              <i class="bi bi-clipboard-check me-2"></i>
+              Gestionar Evaluaciones
+            </button>
+            <button class="btn btn-outline-success">
+              <i class="bi bi-calendar-plus me-2"></i>
+              Tomar Asistencia
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Vista para Administrador -->
+<div *ngIf="!esDocente && !cargandoDatos">
+  
+  <!-- KPIs del Administrador -->
+  <div class="row mb-4" *ngIf="estadisticasAdmin">
+    <div class="col-md-3 mb-3">
+      <div class="card border-primary">
+        <div class="card-body text-center">
+          <i class="bi bi-person-badge fs-2 text-primary"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasAdmin.totalDocentes }}</h3>
+          <p class="text-muted mb-0">Total Docentes</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-success">
+        <div class="card-body text-center">
+          <i class="bi bi-people fs-2 text-success"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasAdmin.totalEstudiantes }}</h3>
+          <p class="text-muted mb-0">Total Estudiantes</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-warning">
+        <div class="card-body text-center">
+          <i class="bi bi-journal-bookmark fs-2 text-warning"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasAdmin.totalMaterias }}</h3>
+          <p class="text-muted mb-0">Total Materias</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card border-info">
+        <div class="card-body text-center">
+          <i class="bi bi-building fs-2 text-info"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasAdmin.totalCursos }}</h3>
+          <p class="text-muted mb-0">Total Cursos</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Métricas Institucionales -->
+  <div class="row mb-4" *ngIf="estadisticasAdmin">
+    <div class="col-md-4 mb-3">
+      <div class="card border-success">
+        <div class="card-body text-center">
+          <i class="bi bi-calendar-check fs-2 text-success"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasAdmin.porcentajeAsistenciaInstitucional }}%</h3>
+          <p class="text-muted mb-0">Asistencia Institucional</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card border-primary">
+        <div class="card-body text-center">
+          <i class="bi bi-graph-up fs-2 text-primary"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasAdmin.promedioGeneralInstitucional }}</h3>
+          <p class="text-muted mb-0">Promedio Institucional</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card border-secondary">
+        <div class="card-body text-center">
+          <i class="bi bi-clipboard-data fs-2 text-secondary"></i>
+          <h3 class="mt-2 mb-0">{{ estadisticasAdmin.evaluacionesRegistradasTotal }}</h3>
+          <p class="text-muted mb-0">Evaluaciones Registradas</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Módulos de Administración -->
+  <div class="row">
+    <div class="col-md-4 mb-4" *ngFor="let tarjeta of tarjetasAdmin">
+      <div class="card admin-card text-center h-100">
+        <div class="card-body d-flex flex-column">
+          <div class="mb-3">
+            <i [ngClass]="tarjeta.icono + ' text-' + tarjeta.color" style="font-size: 2.5rem;"></i>
+          </div>
+          <h5 class="card-title">{{ tarjeta.titulo }}</h5>
+          <p class="card-text flex-grow-1">{{ tarjeta.descripcion }}</p>
+          <a [routerLink]="tarjeta.link" 
+             [ngClass]="'btn btn-' + tarjeta.color + ' btn-sm mt-auto'">
+            <i class="bi bi-arrow-right me-1"></i>
+            Acceder
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
