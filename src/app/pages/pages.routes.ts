@@ -11,14 +11,17 @@ import { GestionComponent } from "./gestion/gestion.component";
 import { EvaluacionIntegralComponent } from "./evaluacion-integral/evaluacion-integral.component";
 import { TipoEvaluacionComponent } from "./tipo-evaluacion/tipo-evaluacion.component";
 import { EvaluacionComponent } from "./evaluacion/evaluacion.component";
+import { BoletinComponent } from "./boletin/boletin.component";
+import { EstimacionesComponent } from "./estimaciones/estimaciones.component";
+import { DashboardComponent } from "./dashboard/dashboard.component";
 //import { DashboardComponent } from "./dashboard/dashboard.component";
 
 
 export const PagesRoutes: Routes = [
-  //{
-   // path: '',
-   // component: DashboardComponent,
- // },
+  {
+   path: '',
+   component: DashboardComponent,
+ },
  {
     path: 'usuario',
     component: DocenteComponent,
@@ -70,6 +73,14 @@ export const PagesRoutes: Routes = [
   {
   path: 'evaluacion',
   component: EvaluacionComponent,
+  },
+  {
+  path: 'boletines',
+  component: BoletinComponent,
+  },
+  {
+  path: 'estimacion-notas',
+  component: EstimacionesComponent,
   },
 
  // {

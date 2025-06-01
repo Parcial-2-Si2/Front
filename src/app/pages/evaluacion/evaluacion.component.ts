@@ -52,8 +52,7 @@ export class EvaluacionComponent {
 
   ngOnInit() {
     this.cargarDatos();
-  }
-  cargarDatos() {
+  }  cargarDatos() {
     this.cargando = true;
     
     // Cargar todas las evaluaciones y datos relacionados
@@ -62,20 +61,8 @@ export class EvaluacionComponent {
       gestiones: this.gestionService.obtenerGestiones(),
       materias: this.materiaService.obtenerMaterias(),
       estudiantes: this.estudianteService.obtenerEstudiantes()
-    }).subscribe({      next: (data) => {
-        console.log('=== DATOS RECIBIDOS DEL BACKEND ===');
-        console.log('Evaluaciones:', data.evaluaciones?.length || 0);
-        console.log('Estudiantes:', data.estudiantes?.length || 0);
-        console.log('Materias:', data.materias?.length || 0);
-        console.log('Gestiones:', data.gestiones?.length || 0);
-        
-        if (data.evaluaciones?.length > 0) {
-          console.log('Primera evaluación:', data.evaluaciones[0]);
-        }
-        if (data.estudiantes?.length > 0) {
-          console.log('Primer estudiante:', data.estudiantes[0]);
-        }
-        
+    }).subscribe({
+      next: (data) => {
         this.gestiones = data.gestiones || [];
         this.materias = data.materias || [];
         this.estudiantes = data.estudiantes || [];
@@ -84,28 +71,16 @@ export class EvaluacionComponent {
         this.evaluaciones = (data.evaluaciones || []).map(ev => this.procesarEvaluacion(ev));
         this.evaluacionesFiltradas = [...this.evaluaciones];
         
-        console.log('Evaluaciones procesadas:', this.evaluaciones.length);
-        console.log('=== FIN PROCESAMIENTO ===');
-        
         this.cargando = false;
-      },      error: (error) => {
+      },
+      error: (error) => {
         console.error('Error al cargar datos:', error);
-        console.log('Cargando datos de prueba para diagnóstico...');
-        
-        // Datos de prueba para verificar la visualización
+        // Cargar datos de prueba como fallback
         this.cargarDatosPrueba();
         this.cargando = false;
       }
     });
   }  private procesarEvaluacion(evaluacion: Evaluacion): EvaluacionDetallada {
-    console.log('Procesando evaluación:', evaluacion.id);
-    console.log('Buscando estudiante con CI:', evaluacion.estudiante_ci, 'tipo:', typeof evaluacion.estudiante_ci);
-    console.log('Total estudiantes disponibles:', this.estudiantes.length);
-    
-    if (this.estudiantes.length > 0) {
-      console.log('Primeros 3 estudiantes:', this.estudiantes.slice(0, 3).map(e => ({ ci: e.ci, tipo: typeof e.ci, nombre: e.nombreCompleto })));
-    }
-    
     // Búsqueda robusta del estudiante (maneja diferentes tipos de datos)
     const estudiante = this.estudiantes.find(e => 
       e.ci === evaluacion.estudiante_ci || 
@@ -114,20 +89,12 @@ export class EvaluacionComponent {
     const materia = this.materias.find(m => m.id === evaluacion.materia_id);
     const gestion = this.gestiones.find(g => g.id === evaluacion.gestion_id);
 
-    console.log('Estudiante encontrado:', estudiante);
-
     const evaluacionDetallada: EvaluacionDetallada = {
       ...evaluacion,
       estudiante_nombre: estudiante?.nombreCompleto || `CI: ${evaluacion.estudiante_ci}`,
       materia_nombre: materia?.nombre || `ID: ${evaluacion.materia_id}`,
       gestion_detalle: gestion ? `${gestion.anio} - ${gestion.periodo}` : `ID: ${evaluacion.gestion_id}`
     };
-
-    console.log('Resultado procesado:', { 
-      id: evaluacionDetallada.id, 
-      estudiante_nombre: evaluacionDetallada.estudiante_nombre,
-      estudiante_ci: evaluacionDetallada.estudiante_ci 
-    });
 
     return evaluacionDetallada;
   }
@@ -223,15 +190,7 @@ export class EvaluacionComponent {
         gestion_id: 2
       }
     ];
-    
-    this.evaluaciones = evaluacionesPrueba.map(ev => this.procesarEvaluacion(ev));
+      this.evaluaciones = evaluacionesPrueba.map(ev => this.procesarEvaluacion(ev));
     this.evaluacionesFiltradas = [...this.evaluaciones];
-    
-    console.log('Datos de prueba cargados exitosamente');
-    console.log('Evaluaciones con nombres:', this.evaluaciones.map(e => ({ 
-      id: e.id, 
-      estudiante_nombre: e.estudiante_nombre, 
-      ci: e.estudiante_ci 
-    })));
   }
 }

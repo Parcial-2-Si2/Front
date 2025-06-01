@@ -78,6 +78,16 @@ export class SidebarComponent {
           label: 'Evaluacion',
           route: '/dashboard/evaluacion',
           icon: 'bi bi-star',
+        },
+        {
+          label: 'Boletines',
+          route: '/dashboard/boletines',
+          icon: 'bi bi-star',
+        },
+        {
+          label: 'Estimación de notas',
+          route: '/dashboard/estimacion-notas',
+          icon: 'bi bi-star',
         }
       ],
     },
