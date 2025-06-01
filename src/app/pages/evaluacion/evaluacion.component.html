@@ -1,0 +1,34 @@
+<div class="p-4">
+  <h2 class="text-xl font-bold mb-4">Lista de Evaluaciones</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+    <input [(ngModel)]="gestionFiltro" type="number" placeholder="Gestión ID" class="border p-2 rounded">
+    <input [(ngModel)]="materiaFiltro" type="number" placeholder="Materia ID" class="border p-2 rounded">
+    <input [(ngModel)]="cursoFiltro" type="number" placeholder="Curso ID" class="border p-2 rounded">
+    <input [(ngModel)]="nombreFiltro" type="text" placeholder="Buscar por nombre" class="border p-2 rounded">
+  </div>
+
+  <div class="flex gap-2 mb-4">
+    <button (click)="aplicarFiltros()" class="bg-blue-500 text-white px-4 py-2 rounded">Aplicar</button>
+    <button (click)="limpiarFiltros()" class="bg-gray-500 text-white px-4 py-2 rounded">Limpiar</button>
+  </div>
+
+  <table class="w-full border">
+    <thead>
+      <tr class="bg-gray-200">
+        <th class="p-2 border">Fecha</th>
+        <th class="p-2 border">Estudiante</th>
+        <th class="p-2 border">Descripción</th>
+        <th class="p-2 border">Nota</th>
+        <th class="p-2 border">Gestión</th>
+        <th class="p-2 border">Materia</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let eva of evaluacionesFiltradas">
+        <td class="p-2 border">{{ eva.fecha }}</td>
+     
+      </tr>
+    </tbody>
+  </table>
+</div>

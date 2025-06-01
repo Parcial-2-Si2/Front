@@ -1,63 +1,252 @@
-<!-- Información superior -->
-<div class="mb-4" *ngIf="materiaSeleccionada && cursoSeleccionado && docenteSeleccionado">
-  <h4><strong>Docente:</strong> {{ docenteSeleccionado.nombreCompleto }}</h4>
-  <p><strong>Materia:</strong> {{ materiaSeleccionada.nombre }}</p>
-  <p><strong>Curso:</strong> {{ cursoSeleccionado.nombre }}</p>
-  <p><strong>Fecha:</strong> {{ fechaHoy | date:'yyyy-MM-dd' }}</p>
+<div class="pagetitle">
+  <h1>{{ esAsistenciaDiaria ? 'Registro de Asistencia' : 'Registro de Evaluación' }}</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/dashboard">Home</a></li>
+      <li class="breadcrumb-item active">{{ esAsistenciaDiaria ? 'Asistencia' : 'Evaluación' }}</li>
+    </ol>
+  </nav>
 </div>
 
-<!-- Tabla de asistencia -->
-<table class="table table-bordered table-hover">
-  <thead>
-    <tr>
-      <th>CI</th>
-      <th>Nombre</th>
-      <th>Asistió</th>
-      <th>Falta</th>
-      <th>Licencia</th>
-      <th>Justificación</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let estudiante of estudiantesFiltrados">
-      <td>{{ estudiante.ci }}</td>
-      <td>{{ estudiante.nombreCompleto }}</td>
-      <td><input type="checkbox" [(ngModel)]="estudiante.asistio" /></td>
-      <td><input type="checkbox" [(ngModel)]="estudiante.falta" /></td>
-      <td><input type="checkbox" [(ngModel)]="estudiante.licencia" (change)="abrirJustificacionModal(estudiante)" /></td>
-      <td>
-        <button *ngIf="estudiante.licencia" class="btn btn-sm btn-info" (click)="abrirJustificacionModal(estudiante)">
-          Ver / Editar
-        </button>
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-<!-- Modal de justificación -->
-<div class="modal" [ngStyle]="{ display: modalVisible ? 'block' : 'none' }">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Justificación de Licencia</h5>
-        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+<!-- Información superior -->
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title">Información de Clase</h5>
+    <div class="row">
+      <div class="col-md-6">
+        <p><strong>Docente:</strong> {{ docenteSeleccionado.nombreCompleto }}</p>
+        <p><strong>Materia:</strong> {{ materiaSeleccionada.nombre }}</p>
       </div>
-      <div *ngIf="estudianteSeleccionado">
-        <label for="justificacion">Justificación:</label>
-        <textarea
-            id="justificacion"
-            class="form-control"
-            [(ngModel)]="estudianteSeleccionado.justificacion">
-        </textarea>
-        </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
-        <button class="btn btn-primary" (click)="guardarJustificacion()">Guardar</button>
+      <div class="col-md-6">
+        <p><strong>Curso:</strong> {{ cursoSeleccionado.nombre }}</p>
+        <p><strong>Fecha:</strong> {{ fechaHoy }}</p>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <label for="gestionSelect" class="form-label">Gestión Académica:</label>        <select
+          id="gestionSelect"
+          class="form-select"
+          [(ngModel)]="gestionSeleccionada"
+          (ngModelChange)="onGestionSeleccionada($event)">
+          <option [ngValue]="null">-- Selecciona una gestión --</option>
+          <option *ngFor="let g of gestiones" [ngValue]="g">
+            {{ g.anio }} - {{ g.periodo }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label for="tipoEvaluacionSelect" class="form-label">Tipo de Evaluación:</label>
+        <select
+          id="tipoEvaluacionSelect"
+          class="form-select"
+          [(ngModel)]="tipoEvaluacionSeleccionada"
+          (ngModelChange)="onTipoEvaluacionSeleccionada($event)">
+          <option [ngValue]="null">-- Selecciona un tipo de evaluación --</option>
+          <option *ngFor="let tipo of tiposEvaluacion" [ngValue]="tipo">
+            {{ tipo.nombre }}
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Input de descripción para evaluaciones que no sean asistencia diaria -->
+    <div class="row mt-3" *ngIf="!esAsistenciaDiaria && tipoEvaluacionSeleccionada">
+      <div class="col-12">
+        <label for="descripcionEvaluacion" class="form-label">Descripción/Concepto:</label>        <input
+          id="descripcionEvaluacion"
+          type="text"
+          class="form-control"
+          [(ngModel)]="descripcionEvaluacion"
+          placeholder="Ingrese la descripción de la evaluación"
+          maxlength="255"
+          (input)="onDescripcionChange($event)">
       </div>
     </div>
   </div>
 </div>
+
+<!-- Tabla dinámica -->
+<div class="card" *ngIf="tipoEvaluacionSeleccionada && estudiantesFiltrados.length > 0">
+  <div class="card-body">
+    <h5 class="card-title">
+      {{ esAsistenciaDiaria ? 'Control de Asistencia' : 'Registro de Evaluación' }}
+    </h5>
+
+    <!-- Controles de paginación y búsqueda -->
+    <div class="d-flex justify-content-between mb-3">
+      <div class="d-flex align-items-center">
+        <span class="me-2">Mostrando</span>
+        <select class="form-select" (change)="changeLimit($event)">
+          <option value="10">10</option>
+          <option value="25">25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <span class="ms-2 text-nowrap">registros por página</span>
+      </div>
+      <div class="d-flex align-items-center">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar..."
+          (input)="searchTable($event)"
+        />
+      </div>
+    </div>
+    
+    <!-- Tabla para asistencia diaria -->
+    <div *ngIf="esAsistenciaDiaria" class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead class="table-light">
+          <tr class="text-center">
+            <th>CI</th>
+            <th>Nombre Completo</th>
+            <th>Asistió</th>
+            <th>Falta</th>
+            <th>Licencia</th>
+            <th>Retraso</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>          <tr *ngFor="let estudiante of estudiantesFiltrados | paginate: { itemsPerPage: limit, currentPage: page }; trackBy: trackByCI">
+            <td class="text-center">{{ estudiante.ci }}</td>
+            <td>{{ estudiante.nombreCompleto }}</td>
+            <td class="text-center">
+              <input 
+                type="checkbox" 
+                class="form-check-input"
+                [(ngModel)]="estudiante.asistio"
+                (change)="onAsistenciaChange(estudiante, 'asistio')" />
+            </td>
+            <td class="text-center">
+              <input 
+                type="checkbox" 
+                class="form-check-input"
+                [(ngModel)]="estudiante.falta"
+                (change)="onAsistenciaChange(estudiante, 'falta')" />
+            </td>
+            <td class="text-center">
+              <input 
+                type="checkbox" 
+                class="form-check-input"
+                [(ngModel)]="estudiante.licencia"
+                (change)="onAsistenciaChange(estudiante, 'licencia')" />
+            </td>
+            <td class="text-center">
+              <input 
+                type="checkbox" 
+                class="form-check-input"
+                [(ngModel)]="estudiante.retraso"
+                (change)="onAsistenciaChange(estudiante, 'retraso')" />
+            </td>
+            <td class="text-center">
+             <button 
+                class="btn btn-sm btn-success me-1" 
+                (click)="guardarEvaluacionIndividual(estudiante)"
+                [disabled]="!gestionSeleccionada">
+                <i class="bi bi-check-lg"></i> Guardar
+              </button>
+
+              <button 
+                class="btn btn-sm btn-primary" 
+                (click)="editarEvaluacion()">
+                <i class="bi bi-pencil"></i> Editar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Tabla para otras evaluaciones -->
+    <div *ngIf="!esAsistenciaDiaria" class="table-responsive">
+      <table class="table table-bordered table-hover">
+        <thead class="table-light">
+          <tr class="text-center">
+            <th>CI</th>
+            <th>Nombre Completo</th>
+            <th>Nota (0-100)</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let estudiante of estudiantesFiltrados; trackBy: trackByCI">
+            <td class="text-center">{{ estudiante.ci }}</td>
+            <td>{{ estudiante.nombreCompleto }}</td>
+            <td class="text-center">
+              <input 
+                type="number" 
+                class="form-control text-center"
+                [(ngModel)]="estudiante.nota"
+                (blur)="validarNota(estudiante)"
+                min="0" 
+                max="100"
+                step="1"
+                style="width: 80px; margin: 0 auto;" />
+            </td>            <td class="text-center">
+              <button 
+                class="btn btn-sm btn-success me-1" 
+                (click)="guardarEvaluacionIndividual(estudiante)"
+                [disabled]="!gestionSeleccionada || !descripcionEvaluacion.trim()">
+                <i class="bi bi-check-lg"></i> Guardar
+              </button>
+
+              <button 
+                class="btn btn-sm btn-primary" 
+                (click)="editarEvaluacion()">
+                <i class="bi bi-pencil"></i> Editar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>    <!-- Paginación -->
+    <div class="d-flex justify-content-end mt-3" *ngIf="estudiantesFiltrados.length > 0">
+      <pagination-controls
+        class="custom-pagination"
+        (pageChange)="page = $event"
+        previousLabel="Anterior"
+        nextLabel="Siguiente">
+      </pagination-controls>
+    </div>
+
+    <!-- Botón volver -->
+    <div class="mt-3 d-flex justify-content-end">
+      <button class="btn btn-secondary" (click)="volver()">
+        <i class="bi bi-arrow-left"></i> Volver
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Mensaje cuando no hay estudiantes -->
+<div class="card" *ngIf="estudiantesFiltrados.length === 0">
+  <div class="card-body text-center">
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle"></i>
+      No se encontraron estudiantes para esta materia y curso.
+    </div>
+  </div>
+</div>
+
+<!-- Mensaje cuando no se ha seleccionado tipo de evaluación -->
+<div class="card" *ngIf="!tipoEvaluacionSeleccionada && estudiantesFiltrados.length > 0">
+  <div class="card-body text-center">
+    <div class="alert alert-warning">
+      <i class="bi bi-exclamation-triangle"></i>
+      Seleccione un tipo de evaluación para comenzar.
+    </div>
+  </div>
+</div>
+
+
+
 <!-- Botón volver -->
-<div class="mt-3">
-  <button class="btn btn-secondary" (click)="volver()">Volver</button>
+<div class="mt-4">
+  <button class="btn btn-secondary" (click)="volver()">
+    <i class="bi bi-arrow-left"></i> Volver
+  </button>
 </div>

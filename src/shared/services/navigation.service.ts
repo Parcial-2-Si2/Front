@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Docente } from '../../app/pages/auth/interfaces/docente.interfaces';
 import { Materia } from '../../app/pages/materia/interfaces/materia.interfaces';
 import { Curso } from '../../app/pages/curso/interfaces/curso.interface';
+import { TipoEvaluacion } from '../../app/pages/tipo-evaluacion/interfaces/tipoEvaluacion.interface';
+import { Gestion } from '../../app/pages/gestion/interfaces/gestion.interface';
 
 @Injectable({ providedIn: 'root' })
 export class NavigationService {
@@ -61,5 +63,27 @@ export class NavigationService {
 
   getCursoActual(): Curso | null {
     return this.cursoActual;
+  }
+
+  //tipo de evaluacion
+  private tipoEvaluacionAsistencia: TipoEvaluacion | null = null;
+
+  setTipoEvaluacionAsistencia(tipo: TipoEvaluacion): void {
+    this.tipoEvaluacionAsistencia = tipo;
+  }
+
+  getTipoEvaluacionAsistencia(): TipoEvaluacion | null {
+    return this.tipoEvaluacionAsistencia;
+  }
+
+  //Gestion
+  private gestionActual: Gestion | null = null;
+
+  setGestionActual(gestion: Gestion): void {
+    this.gestionActual = gestion;
+  }
+
+  getGestionActual(): Gestion | null {
+    return this.gestionActual;
   }
 }

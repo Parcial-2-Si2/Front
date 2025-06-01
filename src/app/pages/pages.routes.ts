@@ -8,6 +8,9 @@ import { InscripcionComponent } from "./inscripcion/inscripcion.component";
 import { MateriaCursoComponent } from "./materia-curso/materia-curso.component";
 import { FiltroEstudiantesComponent } from "./filtro-estudiantes/filtro-estudiantes.component";
 import { GestionComponent } from "./gestion/gestion.component";
+import { EvaluacionIntegralComponent } from "./evaluacion-integral/evaluacion-integral.component";
+import { TipoEvaluacionComponent } from "./tipo-evaluacion/tipo-evaluacion.component";
+import { EvaluacionComponent } from "./evaluacion/evaluacion.component";
 //import { DashboardComponent } from "./dashboard/dashboard.component";
 
 
@@ -55,7 +58,19 @@ export const PagesRoutes: Routes = [
   {
   path: 'gestion',
   component: GestionComponent,
-  }
+  },
+  {
+  path: 'evaluacion-integral',
+  component: EvaluacionIntegralComponent,
+  },
+  {
+  path: 'tipo-evaluacion',
+  component: TipoEvaluacionComponent,
+  },
+  {
+  path: 'evaluacion',
+  component: EvaluacionComponent,
+  },
 
  // {
   //  path: 'reportes',

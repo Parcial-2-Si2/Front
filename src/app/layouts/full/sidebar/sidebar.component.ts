@@ -74,11 +74,11 @@ export class SidebarComponent {
         //   route: '/dashboard/direcciones',
         //   icon: 'bi bi-geo-alt',
         // },
-        /*{
-          label: 'Evaluaciones',
-          route: '/dashboard/evaluaciones',
+        {
+          label: 'Evaluacion',
+          route: '/dashboard/evaluacion',
           icon: 'bi bi-star',
-        }*/
+        }
       ],
     },
     /*

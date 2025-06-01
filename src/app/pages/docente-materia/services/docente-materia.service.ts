@@ -59,14 +59,19 @@ private getHeaders(): HttpHeaders {
       })
     );
   }
-
   eliminarAsignacion(id: number): Observable<string> {
     const url = `${this.BASE_URL}DocenteMateria/${id}`;
+    console.log('🔴 URL para eliminar asignación:', url);
+    console.log('🔴 ID a eliminar:', id);
+    
     return this.http.delete<string>(url, {
       headers: this.getHeaders()
     }).pipe(
+      tap(() => console.log('✅ Respuesta exitosa del servidor para eliminar')),
       catchError((error) => {
-        console.error('Error al eliminar la asignación:', error);
+        console.error('❌ Error del servidor al eliminar la asignación:', error);
+        console.error('❌ Status:', error.status);
+        console.error('❌ Error completo:', error);
         return throwError(() => 'Error al eliminar la asignación');
       })
     );
