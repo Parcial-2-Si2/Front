@@ -1,1 +1,71 @@
-<p>estimaciones works!</p>
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Generar Boletín Completo</h5>
+    <form (ngSubmit)="generarBoletin()" class="row g-3">
+      <div class="col-md-3">
+        <label for="docente_ci" class="form-label">CI Docente</label>
+        <input type="number" class="form-control" [(ngModel)]="docente_ci" name="docente_ci" required />
+      </div>
+      <div class="col-md-3">
+        <label for="materia_id" class="form-label">ID Materia</label>
+        <input type="number" class="form-control" [(ngModel)]="materia_id" name="materia_id" required />
+      </div>
+      <div class="col-md-3">
+        <label for="curso_id" class="form-label">ID Curso</label>
+        <input type="number" class="form-control" [(ngModel)]="curso_id" name="curso_id" required />
+      </div>
+      <div class="col-md-3">
+        <label for="year" class="form-label">Año</label>
+        <input type="number" class="form-control" [(ngModel)]="year" name="year" />
+      </div>
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary">Generar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Resultados -->
+<div class="mt-4" *ngIf="resultado">
+  <h4>Resumen</h4>
+  <p>{{ resultado.mensaje }}</p>
+  <p><strong>Total Estudiantes:</strong> {{ resumen.total_estudiantes }}</p>
+  <ng-container *ngIf="resumen?.promedios_generales as promedios">
+  <p><strong>Prom Final:</strong> {{ promedios.nota_final }}</p>
+  <p><strong>Prom Estimada:</strong> {{ promedios.nota_estimada }}</p>
+</ng-container>
+
+
+  <h5 class="mt-3">Listado</h5>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>CI</th>
+        <th>Nombre</th>
+        <th>Prom Final</th>
+        <th>Prom Estimado</th>
+        <th>Períodos</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let est of estudiantes">
+        <td>{{ est.ci }}</td>
+        <td>{{ est.nombreCompleto }}</td>
+        <td>{{ est.promedios.nota_final }}</td>
+        <td>{{ est.promedios.nota_estimada }}</td>
+        <td>
+          <ul class="list-unstyled mb-0">
+            <li *ngFor="let p of est.periodos">
+              {{ p.anio }} - {{ p.periodo }} | Final: {{ p.nota_final.valor }} | Estimada: {{ p.nota_estimada.valor }}
+            </li>
+          </ul>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Error -->
+<div *ngIf="error" class="alert alert-danger mt-3">
+  {{ error }}
+</div>
