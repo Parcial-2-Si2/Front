@@ -204,6 +204,13 @@
     </div>
   </div>
 </div>
+<!-- Filtro por Año para Administrador 
+<div class="mb-3" *ngIf="!esDocente">
+  <div class="input-group">
+    <input type="number" class="form-control" placeholder="Ingrese año (ej: 2025)" [(ngModel)]="anioBusqueda">
+    <button class="btn btn-outline-primary" (click)="ejecutarBusqueda()">Ejecutar</button>
+  </div>
+</div>-->
 
 <!-- Vista para Administrador -->
 <div *ngIf="!esDocente && !cargandoDatos">

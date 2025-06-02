@@ -1,43 +1,36 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { DashboardService } from './services/dashboard.service';
-import { 
-  DashboardDocente, 
-  DashboardAdmin, 
-  TarjetaAcceso, 
-  MateriaDocente,
-  EstadisticasDocente,
+import {
   AlertaDocente,
-  EstadisticasGlobales
+  EstadisticasDocente,
+  EstadisticasGlobales,
+  MateriaDocente,
+  TarjetaAcceso
 } from './interfaces/dashboard.interface';
-import { AlertsService } from '../../../shared/services/alerts.service';
 import { NavigationService } from '../../../shared/services/navigation.service';
-
-declare const echarts: any;
-declare const ApexCharts: any;
+import { AlertsService } from '../../../shared/services/alerts.service';
+import{ CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
 export class DashboardComponent implements OnInit {
   esDocente: boolean = false;
   ciDocente: string | null = null;
-  usuario: any = null; // Para almacenar información completa del usuario
-  
-  // Datos para docente
+  usuario: any = null;
+  anioBusqueda: number | null = null;
+
   materiasAsignadas: MateriaDocente[] = [];
   estadisticasDocente: EstadisticasDocente | null = null;
   alertasDocente: AlertaDocente[] = [];
-  
-  // Datos para administrador
+
   estadisticasAdmin: EstadisticasGlobales | null = null;
   tarjetasAdmin: TarjetaAcceso[] = [];
-  
-  // Estados de carga
   cargandoDatos = false;
 
   constructor(
@@ -57,155 +50,105 @@ export class DashboardComponent implements OnInit {
 
   private inicializarTarjetasAdmin(): void {
     this.tarjetasAdmin = [
-      {
-        titulo: 'Gestiones',
-        descripcion: 'Administrar gestiones académicas',
-        icono: 'bi bi-calendar-check',
-        link: '/dashboard/gestion',
-        color: 'primary'
-      },
-      {
-        titulo: 'Docentes',
-        descripcion: 'Gestionar información de docentes',
-        icono: 'bi bi-person-badge',
-        link: '/dashboard/docente',
-        color: 'success'
-      },
-      {
-        titulo: 'Estudiantes',
-        descripcion: 'Administrar estudiantes',
-        icono: 'bi bi-people',
-        link: '/dashboard/estudiante',
-        color: 'info'
-      },
-      {
-        titulo: 'Materias',
-        descripcion: 'Gestionar materias y cursos',
-        icono: 'bi bi-journal-bookmark',
-        link: '/dashboard/materia',
-        color: 'warning'
-      },
-      {
-        titulo: 'Evaluaciones',
-        descripcion: 'Ver todas las evaluaciones',
-        icono: 'bi bi-clipboard-check',
-        link: '/dashboard/evaluacion',
-        color: 'secondary'
-      },
-      {
-        titulo: 'Boletines',
-        descripcion: 'Generar y consultar boletines',
-        icono: 'bi bi-file-earmark-text',
-        link: '/dashboard/boletin',
-        color: 'dark'
-      }
+      { titulo: 'Gestiones', descripcion: 'Administrar gestiones académicas', icono: 'bi bi-calendar-check', link: '/dashboard/gestion', color: 'primary' },
+      { titulo: 'Docentes', descripcion: 'Gestionar información de docentes', icono: 'bi bi-person-badge', link: '/dashboard/docentes', color: 'success' },
+      { titulo: 'Estudiantes', descripcion: 'Administrar estudiantes', icono: 'bi bi-people', link: '/dashboard/estudiante', color: 'info' },
+      { titulo: 'Materias', descripcion: 'Gestionar materias y cursos', icono: 'bi bi-journal-bookmark', link: '/dashboard/materias', color: 'warning' },
+      { titulo: 'Evaluaciones', descripcion: 'Ver todas las evaluaciones', icono: 'bi bi-clipboard-check', link: '/dashboard/evaluacion', color: 'secondary' },
+      { titulo: 'Boletines', descripcion: 'Generar y consultar boletines', icono: 'bi bi-file-earmark-text', link: '/dashboard/boletines', color: 'dark' }
     ];
   }
 
-  private cargarDatosDashboard(): void {
+  cargarDatosDashboard(): void {
     this.cargandoDatos = true;
-    
+
     if (this.esDocente && this.ciDocente) {
-      this.cargarDatosDocente();
+      this.dashboardService.getEstadisticasDocente(this.ciDocente).subscribe({
+        next: res => {
+          this.materiasAsignadas = res.cursos.map((curso: any) => ({
+            id: 0,
+            nombre: curso.materias_docente.map((m: any) => m.nombre).join(', '),
+            curso: curso.curso_info,
+            totalEstudiantes: curso.total_estudiantes,
+            porcentajeAsistencia: 0,
+            promedioNotas: 0,
+            estudiantesTopRendimiento: [],
+            estudiantesBajoRendimiento: []
+          }));
+
+          this.estadisticasDocente = {
+            totalEstudiantes: res.resumen.total_estudiantes,
+            totalMaterias: res.resumen.total_materias_asignadas,
+            promedioAsistenciaGeneral: 0,
+            promedioNotasGeneral: 0,
+            evaluacionesRegistradas: 0
+          };
+        },
+        error: err => {
+          this.alertsService.toast('Error al cargar datos del docente', 'error');
+        }
+      });
+
+      this.dashboardService.getMejoresPeores(this.ciDocente).subscribe({
+        next: res => {
+          const alertas: AlertaDocente[] = [];
+          const materias = Object.values(res.materias_con_estudiantes);
+
+          materias.forEach((m: any) => {
+            m.peores_estudiantes?.forEach((e: any) => {
+              alertas.push({
+                tipo: 'bajo_rendimiento',
+                estudiante: e.nombre_completo,
+                descripcion: `Promedio: ${e.nota_final}`,
+                prioridad: e.nota_final < 51 ? 'alta' : 'media'
+              });
+            });
+          });
+
+          this.alertasDocente = alertas;
+        }
+      });
+
     } else {
-      this.cargarDatosAdmin();
+      const params: any = this.anioBusqueda ? { gestion_id: this.anioBusqueda } : {};
+
+      this.dashboardService.getEstadisticasAdmin().subscribe({
+        next: res => {
+          this.estadisticasAdmin = {
+            totalDocentes: res.total_docentes,
+            totalEstudiantes: res.total_estudiantes,
+            totalMaterias: 0,
+            totalCursos: 0,
+            porcentajeAsistenciaInstitucional: 0,
+            promedioGeneralInstitucional: 0,
+            evaluacionesRegistradasTotal: 0,
+            ...res
+          };
+        },
+        error: err => {
+          this.alertsService.toast('Error al cargar estadísticas del administrador', 'error');
+        }
+      });
+
+      this.dashboardService.getEvaluacionesContadas(this.anioBusqueda || undefined).subscribe({
+        next: res => {
+          this.estadisticasAdmin = {
+            ...this.estadisticasAdmin!,
+            totalMaterias: res.resumen_general?.total_materias_evaluadas || 0,
+            totalCursos: res.resumen_general?.total_cursos || 0,
+            evaluacionesRegistradasTotal: res.resumen_general?.total_evaluaciones || 0
+          };
+        }
+      });
     }
-    
-    // Simular carga de datos
-    setTimeout(() => {
-      this.cargandoDatos = false;
-    }, 1000);
+
+    setTimeout(() => this.cargandoDatos = false, 1000);
   }
 
-  private cargarDatosDocente(): void {
-    // Datos de prueba para docente
-    this.materiasAsignadas = [
-      {
-        id: 1,
-        nombre: 'Matemáticas',
-        curso: {
-          id: 1,
-          nombre: '1ro A',
-          turno: 'Mañana'
-        },
-        totalEstudiantes: 28,
-        porcentajeAsistencia: 87.5,
-        promedioNotas: 78.2,
-        estudiantesTopRendimiento: [
-          { id: 1, nombre: 'Ana García', ci: '12345678', promedio: 92.5, porcentajeAsistencia: 98 },
-          { id: 2, nombre: 'Carlos López', ci: '87654321', promedio: 89.3, porcentajeAsistencia: 95 },
-          { id: 3, nombre: 'María Silva', ci: '11223344', promedio: 86.7, porcentajeAsistencia: 94 }
-        ],
-        estudiantesBajoRendimiento: [
-          { id: 4, nombre: 'Pedro Rojas', ci: '55667788', promedio: 45.2, porcentajeAsistencia: 65 },
-          { id: 5, nombre: 'Luis Torres', ci: '99887766', promedio: 38.9, porcentajeAsistencia: 58 }
-        ]
-      },
-      {
-        id: 2,
-        nombre: 'Física',
-        curso: {
-          id: 2,
-          nombre: '2do B',
-          turno: 'Tarde'
-        },
-        totalEstudiantes: 25,
-        porcentajeAsistencia: 82.3,
-        promedioNotas: 74.8,
-        estudiantesTopRendimiento: [
-          { id: 6, nombre: 'Sofia Mendoza', ci: '22334455', promedio: 88.9, porcentajeAsistencia: 96 },
-          { id: 7, nombre: 'Diego Cruz', ci: '66778899', promedio: 85.1, porcentajeAsistencia: 92 }
-        ],
-        estudiantesBajoRendimiento: [
-          { id: 8, nombre: 'Carmen Vega', ci: '33445566', promedio: 42.7, porcentajeAsistencia: 62 }
-        ]
-      }
-    ];
-
-    this.estadisticasDocente = {
-      totalEstudiantes: 53,
-      totalMaterias: 2,
-      promedioAsistenciaGeneral: 84.9,
-      promedioNotasGeneral: 76.5,
-      evaluacionesRegistradas: 24
-    };
-
-    this.alertasDocente = [
-      {
-        tipo: 'bajo_rendimiento',
-        estudiante: 'Pedro Rojas',
-        descripcion: 'Promedio por debajo de 51 puntos (45.2)',
-        prioridad: 'alta'
-      },
-      {
-        tipo: 'ausencias_frecuentes',
-        estudiante: 'Luis Torres',
-        descripcion: 'Asistencia del 58% - Por debajo del mínimo',
-        prioridad: 'alta'
-      },
-      {
-        tipo: 'bajo_rendimiento',
-        estudiante: 'Carmen Vega',
-        descripcion: 'Promedio de 42.7 puntos en Física',
-        prioridad: 'media'
-      }
-    ];
+  ejecutarBusqueda(): void {
+    this.cargarDatosDashboard();
   }
 
-  private cargarDatosAdmin(): void {
-    // Datos de prueba para administrador
-    this.estadisticasAdmin = {
-      totalDocentes: 45,
-      totalEstudiantes: 1250,
-      totalMaterias: 18,
-      totalCursos: 24,
-      porcentajeAsistenciaInstitucional: 84.2,
-      promedioGeneralInstitucional: 73.8,
-      evaluacionesRegistradasTotal: 2847
-    };
-  }
-
-  // Métodos para obtener clases CSS según el rendimiento
   getClaseRendimiento(promedio: number): string {
     if (promedio >= 85) return 'badge bg-success';
     if (promedio >= 70) return 'badge bg-warning';

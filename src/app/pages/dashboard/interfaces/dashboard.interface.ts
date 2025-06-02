@@ -1,28 +1,33 @@
-// Interfaces para el Dashboard Educativo
-
-export interface Curso {
-  id: number;
-  nombre: string;
-  turno: string;
-}
-
-export interface EstudianteRendimiento {
-  id: number;
-  nombre: string;
-  ci: string;
-  promedio: number;
-  porcentajeAsistencia: number;
+export interface TarjetaAcceso {
+  titulo: string;
+  descripcion: string;
+  icono: string;
+  link: string;
+  color: string;
 }
 
 export interface MateriaDocente {
   id: number;
   nombre: string;
-  curso: Curso;
+  curso: {
+    id: number;
+    nombre: string;
+    turno: string;
+    nivel?: string;
+  };
   totalEstudiantes: number;
   porcentajeAsistencia: number;
   promedioNotas: number;
-  estudiantesTopRendimiento: EstudianteRendimiento[];
-  estudiantesBajoRendimiento: EstudianteRendimiento[];
+  estudiantesTopRendimiento: EstudianteResumen[];
+  estudiantesBajoRendimiento: EstudianteResumen[];
+}
+
+export interface EstudianteResumen {
+  id?: number;
+  nombre: string;
+  ci: string;
+  promedio: number;
+  porcentajeAsistencia: number;
 }
 
 export interface EstadisticasDocente {
@@ -34,16 +39,10 @@ export interface EstadisticasDocente {
 }
 
 export interface AlertaDocente {
-  tipo: 'bajo_rendimiento' | 'ausencias_frecuentes' | 'evaluacion_pendiente';
+  tipo: string;
   estudiante: string;
   descripcion: string;
   prioridad: 'alta' | 'media' | 'baja';
-}
-
-export interface DashboardDocente {
-  materias: MateriaDocente[];
-  estadisticas: EstadisticasDocente;
-  alertas: AlertaDocente[];
 }
 
 export interface EstadisticasGlobales {
@@ -54,17 +53,4 @@ export interface EstadisticasGlobales {
   porcentajeAsistenciaInstitucional: number;
   promedioGeneralInstitucional: number;
   evaluacionesRegistradasTotal: number;
-}
-
-export interface TarjetaAcceso {
-  titulo: string;
-  descripcion: string;
-  icono: string;
-  link: string;
-  color: string;
-}
-
-export interface DashboardAdmin {
-  estadisticasGlobales: EstadisticasGlobales;
-  tarjetasAcceso: TarjetaAcceso[];
 }
