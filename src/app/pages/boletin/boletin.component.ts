@@ -54,7 +54,6 @@ export class BoletinComponent {
       window.open(url);
     });
   }
-}
 */
 
 import { Component } from '@angular/core';
@@ -62,6 +61,9 @@ import { BoletinService } from './services/boletin.service';
 import { AlertsService } from '../../../shared/services/alerts.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-boletin-completo',
@@ -78,6 +80,10 @@ export class BoletinComponent {
   materias: any[] = [];    // Lista de materias + notas
   encabezados: string[] = ['Materia']; // Materia + columnas dinámicas
   resumen: any = null;
+  
+  // Datos del estudiante
+  estudiante: any = null;
+  cursosEstudiante: any[] = [];
 
   cargando: boolean = false;
 
@@ -85,7 +91,6 @@ export class BoletinComponent {
     private boletinService: BoletinService,
     private alerts: AlertsService
   ) {}
-
   buscar(): void {
     if (!this.ci) {
       this.alerts.toast('Debe ingresar un CI válido', 'warning');
@@ -96,6 +101,8 @@ export class BoletinComponent {
 
     this.boletinService.obtenerBoletinCompleto(this.ci, this.year).subscribe({
       next: (res) => {
+        this.estudiante = res.estudiante;
+        this.cursosEstudiante = res.cursos;
         this.resumen = res.resumen_general;
         this.procesarTabla(res.materias);
         this.cargando = false;
@@ -131,5 +138,161 @@ export class BoletinComponent {
     this.columnas = Array.from(columnasSet).sort();
     this.encabezados = ['Materia', ...this.columnas];
     this.materias = materiasProcesadas;
+  }  descargarPDF(): void {
+    if (!this.estudiante) {
+      this.alerts.toast('No hay datos para descargar', 'warning');
+      return;
+    }
+    
+    this.alerts.toast('Generando PDF...', 'info');
+    
+    try {
+      const doc = new jsPDF();
+      
+      // Título del documento
+      doc.setFontSize(18);
+      doc.text('Boletín de Notas', 14, 22);
+      
+      // Información del estudiante
+      doc.setFontSize(12);
+      doc.text(`CI: ${this.estudiante.ci}`, 14, 35);
+      doc.text(`Nombre: ${this.estudiante.nombreCompleto}`, 14, 45);
+      doc.text(`Año: ${this.year}`, 14, 55);
+      
+      if (this.cursosEstudiante.length > 0) {
+        const cursos = this.cursosEstudiante.map(c => 
+          `${c.nombre}${c.paralelo ? ' - ' + c.paralelo : ''}`
+        ).join(', ');
+        doc.text(`Curso(s): ${cursos}`, 14, 65);
+      }
+      
+      // Preparar datos para la tabla
+      const tableColumns = this.encabezados;
+      const tableRows = this.materias.map(materia => 
+        this.encabezados.map(col => materia[col] ?? '-')
+      );
+      
+      // Crear la tabla
+      autoTable(doc, {
+        head: [tableColumns],
+        body: tableRows,
+        startY: 80,
+        styles: {
+          fontSize: 8,
+          cellPadding: 2
+        },
+        headStyles: {
+          fillColor: [41, 128, 185],
+          textColor: 255,
+          fontSize: 9
+        },
+        alternateRowStyles: {
+          fillColor: [245, 245, 245]
+        },
+        columnStyles: {
+          0: { cellWidth: 40 } // Columna de materia más ancha
+        }
+      });
+      
+      // Agregar resumen si existe
+      if (this.resumen) {
+        const finalY = (doc as any).lastAutoTable.finalY + 20;
+        doc.setFontSize(10);
+        doc.text(`Promedio General Final: ${this.resumen.promedio_general_final ?? 'N/A'}`, 14, finalY);
+        doc.text(`Promedio General Estimado: ${this.resumen.promedio_general_estimado ?? 'N/A'}`, 14, finalY + 10);
+      }
+      
+      // Descargar el archivo
+      const fileName = `boletin_${this.estudiante.nombreCompleto.replace(/\s+/g, '_')}_${this.year}.pdf`;
+      doc.save(fileName);
+      
+      this.alerts.toast('PDF generado exitosamente', 'success');
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      this.alerts.toast('Error al generar PDF', 'error');
+    }
+  }
+  descargarExcel(): void {
+    if (!this.estudiante) {
+      this.alerts.toast('No hay datos para descargar', 'warning');
+      return;
+    }
+    
+    this.alerts.toast('Generando Excel...', 'info');
+    
+    try {
+      // Crear un nuevo libro de trabajo
+      const workbook = XLSX.utils.book_new();
+      
+      // Crear hoja de información del estudiante
+      const infoData = [
+        ['BOLETÍN DE NOTAS'],
+        [''],
+        ['CI:', this.estudiante.ci],
+        ['Nombre:', this.estudiante.nombreCompleto],
+        ['Año:', this.year]
+      ];
+      
+      if (this.estudiante.fechaNacimiento) {
+        infoData.push(['Fecha de Nacimiento:', new Date(this.estudiante.fechaNacimiento).toLocaleDateString('es-ES')]);
+      }
+      
+      if (this.estudiante.apoderado) {
+        infoData.push(['Apoderado:', this.estudiante.apoderado]);
+      }
+      
+      if (this.estudiante.telefono) {
+        infoData.push(['Teléfono:', this.estudiante.telefono]);
+      }
+      
+      if (this.cursosEstudiante.length > 0) {
+        const cursos = this.cursosEstudiante.map(c => 
+          `${c.nombre}${c.paralelo ? ' - ' + c.paralelo : ''}`
+        ).join(', ');
+        infoData.push(['Curso(s):', cursos]);
+      }
+      
+      infoData.push([''], ['NOTAS POR MATERIA:']);
+      
+      // Crear datos de la tabla de notas
+      const notasData = [this.encabezados];
+      this.materias.forEach(materia => {
+        const fila = this.encabezados.map(col => materia[col] ?? '-');
+        notasData.push(fila);
+      });
+      
+      // Agregar resumen si existe
+      if (this.resumen) {
+        notasData.push([]);
+        notasData.push(['RESUMEN GENERAL:']);
+        notasData.push(['Promedio General Final:', this.resumen.promedio_general_final ?? 'N/A']);
+        notasData.push(['Promedio General Estimado:', this.resumen.promedio_general_estimado ?? 'N/A']);
+      }
+      
+      // Combinar toda la información
+      const allData = [...infoData, [], ...notasData];
+      
+      // Crear la hoja de trabajo
+      const worksheet = XLSX.utils.aoa_to_sheet(allData);
+      
+      // Establecer anchos de columna
+      const colWidths = [
+        { wch: 25 }, // Primera columna más ancha
+        ...this.encabezados.slice(1).map(() => ({ wch: 15 }))
+      ];
+      worksheet['!cols'] = colWidths;
+      
+      // Agregar la hoja al libro
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Boletín');
+      
+      // Generar el archivo
+      const fileName = `boletin_${this.estudiante.nombreCompleto.replace(/\s+/g, '_')}_${this.year}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      
+      this.alerts.toast('Excel generado exitosamente', 'success');
+    } catch (error) {
+      console.error('Error generando Excel:', error);
+      this.alerts.toast('Error al generar Excel', 'error');
+    }
   }
 }

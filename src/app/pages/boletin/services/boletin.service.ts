@@ -91,7 +91,6 @@ export class BoletinService {
       })
     );
   }
-}
 */
 
 import { Injectable } from '@angular/core';
@@ -124,6 +123,65 @@ export class BoletinService {
       catchError(err => {
         console.error('[BoletinCompletoService] Error:', err);
         return throwError(() => new Error('Error al obtener el boletín completo'));
+      })
+    );
+  }
+  descargarBoletinPDF(ci: number, year: number): Observable<Blob> {
+    const url = `${this.BASE_URL}Estudiantes/${ci}/boletin-completo/pdf`;
+    const params = new HttpParams().set('year', year.toString());
+
+    const headers = new HttpHeaders({
+      'Authorization': localStorage.getItem(this.TOKEN_KEY) || '',
+      'Accept': 'application/pdf'
+    });
+
+    return this.http.get(url, {
+      headers: headers,
+      params,
+      responseType: 'blob'    }).pipe(
+      catchError(err => {
+        console.error('[BoletinService] Error al descargar PDF:', err);
+        
+        let errorMessage = 'Error al descargar PDF';
+        if (err.status === 404) {
+          errorMessage = 'No se encontró el boletín para el estudiante y año especificados';
+        } else if (err.status === 500) {
+          errorMessage = 'Error interno del servidor al generar el PDF';
+        } else if (err.status === 0) {
+          errorMessage = 'No se puede conectar con el servidor';
+        }
+        
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+  descargarBoletinExcel(ci: number, year: number): Observable<Blob> {
+    const url = `${this.BASE_URL}Estudiantes/${ci}/boletin-completo/excel`;
+    const params = new HttpParams().set('year', year.toString());
+
+    const headers = new HttpHeaders({
+      'Authorization': localStorage.getItem(this.TOKEN_KEY) || '',
+      'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+
+    return this.http.get(url, {
+      headers: headers,
+      params,
+      responseType: 'blob'    }).pipe(
+      catchError(err => {
+        console.error('[BoletinService] Error al descargar Excel:', err);
+        
+        let errorMessage = 'Error al descargar Excel';
+        if (err.status === 404) {
+          errorMessage = 'No se encontró el boletín para el estudiante y año especificados';
+        } else if (err.status === 500) {
+          errorMessage = 'Error interno del servidor al generar el Excel';
+        } else if (err.status === 0) {
+          errorMessage = 'No se puede conectar con el servidor';
+        }
+        
+        return throwError(() => new Error(errorMessage));
       })
     );
   }

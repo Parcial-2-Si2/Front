@@ -9,12 +9,13 @@ import { Curso } from '../curso/interfaces/curso.interface';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { NgxPaginationModule } from 'ngx-pagination';
 import { NavigationService } from '../../../shared/services/navigation.service';
 
 @Component({
   selector: 'app-materia-curso',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgxPaginationModule],
   templateUrl: './materia-curso.component.html',
   styleUrls: ['./materia-curso.component.css']
 })
@@ -22,6 +23,7 @@ export class MateriaCursoComponent implements OnInit {
   cursoSeleccionado!: Curso;
   cursoId!: number;
   materiasAsignadas: MateriaCurso[] = [];
+  materiasAsignadasFiltradas: MateriaCurso[] = [];
   todasLasMaterias: Materia[] = [];
   materiasDisponibles: Materia[] = [];
   materiaSeleccionadaId: number | null = null;
@@ -29,6 +31,9 @@ export class MateriaCursoComponent implements OnInit {
   asignacionSeleccionada!: MateriaCurso;
   isEditMode: boolean = false;
   isDocente: boolean = false;
+  page = 1;
+  limit = 10;
+  searchTerm = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -86,7 +91,6 @@ export class MateriaCursoComponent implements OnInit {
 }
 
 
-
   obtenerAsignaciones(): void {
     this.materiaCursoService.obtenerAsignaciones().subscribe({
       next: (asignaciones) => {
@@ -95,6 +99,7 @@ export class MateriaCursoComponent implements OnInit {
           const materia = this.todasLasMaterias.find(m => m.id === asignacion.materia_id);
           return { ...asignacion, materia };
         });
+        this.materiasAsignadasFiltradas = [...this.materiasAsignadas];
         this.actualizarMateriasDisponibles();
       },
       error: () => {
@@ -152,6 +157,22 @@ export class MateriaCursoComponent implements OnInit {
   });
 }
 
+changeLimit(event: any): void {
+  this.limit = parseInt(event.target.value);
+  this.page = 1;
+}
+
+searchTable(event: any): void {
+  this.searchTerm = event.target.value.toLowerCase();
+  if (this.searchTerm) {
+    this.materiasAsignadasFiltradas = this.materiasAsignadas.filter(asignacion =>
+      asignacion.materia?.nombre?.toLowerCase().includes(this.searchTerm)
+    );
+  } else {
+    this.materiasAsignadasFiltradas = [...this.materiasAsignadas];
+  }
+  this.page = 1;
+}
 
   volver(): void {
     this.router.navigate(['/dashboard/curso']);

@@ -19,6 +19,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 })
 export class InscripcionComponent implements OnInit {
   inscripciones: Inscripcion[] = [];
+  inscripcionesFiltradas: Inscripcion[] = [];
   estudiantes: Estudiante[] = [];
   cursos: Curso[] = [];
   inscripcionForm!: FormGroup;
@@ -30,6 +31,7 @@ export class InscripcionComponent implements OnInit {
   modalVerVisible = false;
   page = 1;
   limit = 10;
+  searchTerm = '';
 
   constructor(
     private inscripcionService: InscripcionService,
@@ -50,10 +52,12 @@ export class InscripcionComponent implements OnInit {
     this.obtenerCursos();
     this.obtenerEstudiantes();
   }
-
   obtenerInscripciones(): void {
     this.inscripcionService.obtenerInscripciones().subscribe({
-      next: (data) => this.inscripciones = data,
+      next: (data) => {
+        this.inscripciones = data;
+        this.inscripcionesFiltradas = [...data];
+      },
       error: () => console.error('Error al obtener inscripciones')
     });
   }
@@ -172,6 +176,23 @@ getDescripcionCurso(id: number): string {
   const curso = this.cursos.find(c => c.id === id);
   return curso
     ? `${curso.nombre}` : 'Curso no encontrado';
+}
+
+changeLimit(event: any): void {
+  this.limit = parseInt(event.target.value);
+  this.page = 1;
+}
+
+searchTable(event: any): void {
+  this.searchTerm = event.target.value.toLowerCase();
+  if (this.searchTerm) {
+    this.inscripcionesFiltradas = this.inscripciones.filter(inscripcion =>
+      this.getNombreEstudiante(inscripcion.estudiante_ci).toLowerCase().includes(this.searchTerm)
+    );
+  } else {
+    this.inscripcionesFiltradas = [...this.inscripciones];
+  }
+  this.page = 1;
 }
 
 }
