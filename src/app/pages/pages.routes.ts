@@ -11,9 +11,11 @@ import { GestionComponent } from "./gestion/gestion.component";
 import { EvaluacionIntegralComponent } from "./evaluacion-integral/evaluacion-integral.component";
 import { TipoEvaluacionComponent } from "./tipo-evaluacion/tipo-evaluacion.component";
 import { EvaluacionComponent } from "./evaluacion/evaluacion.component";
-import { BoletinComponent } from "./boletin/boletin.component";
+
 import { EstimacionesComponent } from "./estimaciones/estimaciones.component";
 import { DashboardComponent } from "./dashboard/dashboard.component";
+import { BoletinComponent } from "./boletin/boletin.component";
+
 
 
 export const PagesRoutes: Routes = [
@@ -75,7 +77,7 @@ export const PagesRoutes: Routes = [
   },
   {
   path: 'boletines',
-  component: BoletinComponent,
+  component:BoletinComponent ,
   },
   {
   path: 'estimacion-notas',
