@@ -111,14 +111,17 @@ export class EstimacionesComponent {
       }
     });
   }
-
   // Método para cambiar el límite de elementos por página
-  changeLimit(): void {
+  changeLimit(event: any): void {
+    this.limit = parseInt(event.target.value);
     this.page = 1; // Reset a la primera página
   }
-
   // Método para filtrar estudiantes por período
-  searchTable(): void {
+  searchTable(event?: any): void {
+    if (event) {
+      this.searchTerm = event.target.value;
+    }
+    
     if (!this.searchTerm.trim()) {
       this.estudiantesFiltrados = [...this.estudiantes];
     } else {
@@ -129,5 +132,48 @@ export class EstimacionesComponent {
       );
     }
     this.page = 1; // Reset pagination when searching
+  }
+
+  // Método para limpiar la búsqueda
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.searchTable();
+  }
+
+  // Métodos auxiliares para la paginación
+  getStartIndex(): number {
+    return (this.page - 1) * this.limit;
+  }
+
+  getEndIndex(): number {
+    const endIndex = this.page * this.limit;
+    return endIndex > this.estudiantesFiltrados.length ? this.estudiantesFiltrados.length : endIndex;
+  }
+
+  getTotalPages(): number {
+    return Math.ceil(this.estudiantesFiltrados.length / this.limit);
+  }
+  // Método para obtener los estudiantes de la página actual
+  getPaginatedEstudiantes(): BoletinEstudiante[] {
+    const startIndex = this.getStartIndex();
+    const endIndex = this.getEndIndex();
+    return this.estudiantesFiltrados.slice(startIndex, endIndex);
+  }
+
+  // Métodos para obtener las clases CSS de las notas
+  getNotaFinalClass(valor: number): string {
+    const baseClass = 'nota-final';
+    if (valor < 51) {
+      return `${baseClass} nota-reprobada`;
+    }
+    return `${baseClass} nota-final-aprobada`;
+  }
+
+  getNotaEstimadaClass(valor: number): string {
+    const baseClass = 'nota-estimada';
+    if (valor < 51) {
+      return `${baseClass} nota-reprobada`;
+    }
+    return `${baseClass} nota-estimada-aprobada`;
   }
 }

@@ -103,15 +103,16 @@
         <tr>
           <th *ngFor="let col of encabezados">{{ col }}</th>
         </tr>
-      </thead>
-      <tbody>
+      </thead>      <tbody>
         <tr *ngFor="let fila of materias">
-          <td *ngFor="let col of encabezados">{{ fila[col] ?? '-' }}</td>
+          <td *ngFor="let col of encabezados">
+            {{ formatearValor(fila[col], col) }}
+          </td>
         </tr>
       </tbody>
     </table>    <div class="mt-3">
-      <strong>Promedio General Final:</strong> {{ resumen?.promedio_general_final ?? 'N/A' }} |
-      <strong>Promedio Estimado:</strong> {{ resumen?.promedio_general_estimado ?? 'N/A' }}
+      <strong>Promedio General Final:</strong> {{ (resumen?.promedio_general_final | number:'1.0-2') ?? 'N/A' }} |
+      <strong>Promedio Estimado:</strong> {{ (resumen?.promedio_general_estimado | number:'1.0-2') ?? 'N/A' }}
     </div>
 
     <!-- Botones de descarga -->

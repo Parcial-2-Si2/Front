@@ -1,0 +1,122 @@
+/* Estilos para la tabla de estudiantes */
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Estilos para los controles de búsqueda */
+.input-group-text {
+  background-color: #e9ecef;
+  border-color: #ced4da;
+}
+
+/* Espaciado en los resultados de búsqueda */
+.search-results-info {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+/* Estilos para la paginación */
+.pagination {
+  margin-bottom: 0;
+}
+
+/* Estilos para la tabla responsive */
+.table-responsive {
+  border-radius: 0.375rem;
+}
+
+/* Mejorar la apariencia de las listas de períodos */
+.list-unstyled li {
+  padding: 0.125rem 0;
+  font-size: 0.875rem;
+}
+
+/* Destacar la información de paginación */
+.pagination-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Botón de limpiar búsqueda */
+.btn-clear-search {
+  border-left: 0;
+}
+
+/* Indicador de loading */
+.loading-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 0.125rem solid #f3f3f3;
+  border-top: 0.125rem solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsividad para dispositivos móviles */
+@media (max-width: 768px) {
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+  
+  .pagination-controls {
+    justify-content: center;
+  }
+  
+  .search-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Estilos para las notas en la columna de períodos */
+.nota-final {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  display: inline-block;
+  margin: 1px;
+}
+
+.nota-estimada {
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  display: inline-block;
+  margin: 1px;
+}
+
+/* Nota reprobada (menor a 51) - siempre roja */
+.nota-reprobada {
+  background-color: #dc3545 !important;
+  color: white !important;
+}
+
+/* Nota final aprobada (51 o más) - verde */
+.nota-final-aprobada {
+  background-color: #198754;
+  color: white;
+}
+
+/* Nota estimada aprobada (51 o más) - azul */
+.nota-estimada-aprobada {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/* Hover effects */
+.nota-final:hover,
+.nota-estimada:hover {
+  opacity: 0.8;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}

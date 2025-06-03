@@ -113,7 +113,6 @@ export class BoletinComponent {
       }
     });
   }
-
   procesarTabla(materias: any[]): void {
     const columnasSet = new Set<string>();
     const materiasProcesadas: any[] = [];
@@ -125,8 +124,9 @@ export class BoletinComponent {
         const claveFinal = `${periodo.anio} - ${periodo.periodo} (Final)`;
         const claveEstimada = `${periodo.anio} - ${periodo.periodo} (Estimada)`;
 
-        fila[claveFinal] = periodo.nota_final.valor ?? '-';
-        fila[claveEstimada] = periodo.nota_estimada.valor ?? '-';
+        // Asignar valores numéricos directamente o null si no existen
+        fila[claveFinal] = periodo.nota_final?.valor !== undefined ? periodo.nota_final.valor : null;
+        fila[claveEstimada] = periodo.nota_estimada?.valor !== undefined ? periodo.nota_estimada.valor : null;
 
         columnasSet.add(claveFinal);
         columnasSet.add(claveEstimada);
@@ -138,7 +138,10 @@ export class BoletinComponent {
     this.columnas = Array.from(columnasSet).sort();
     this.encabezados = ['Materia', ...this.columnas];
     this.materias = materiasProcesadas;
-  }  descargarPDF(): void {
+    
+    console.log('Materias procesadas:', this.materias);
+    console.log('Encabezados:', this.encabezados);
+  }descargarPDF(): void {
     if (!this.estudiante) {
       this.alerts.toast('No hay datos para descargar', 'warning');
       return;
@@ -294,5 +297,24 @@ export class BoletinComponent {
       console.error('Error generando Excel:', error);
       this.alerts.toast('Error al generar Excel', 'error');
     }
+  }
+  // Método para verificar si un valor es numérico
+  isNumeric(value: any): boolean {
+    return !isNaN(parseFloat(value)) && isFinite(value);
+  }
+
+  // Método para formatear valores en la tabla
+  formatearValor(valor: any, columna: string): string {
+    if (!valor && valor !== 0) return '-';
+    
+    if (columna === 'Materia') {
+      return valor.toString();
+    }
+    
+    if (this.isNumeric(valor)) {
+      return parseFloat(valor).toFixed(2);
+    }
+    
+    return valor.toString();
   }
 }
