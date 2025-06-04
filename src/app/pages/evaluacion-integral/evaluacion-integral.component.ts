@@ -47,10 +47,20 @@ export class EvaluacionIntegralComponent implements OnInit {
 
     this.obtenerEvaluaciones();
   }
-
   obtenerEvaluaciones(): void {
     this.service.obtenerEvaluaciones().subscribe({
-      error: () => this.alertsService.toast('Error al cargar las evaluaciones.', 'error')
+      next: (evaluaciones) => {
+        if (evaluaciones.length === 0) {
+          this.alertsService.alertInfo('No se encontraron evaluaciones integrales registradas', 'Sin datos');
+        }
+      },
+      error: (error) => {
+        console.error('Error al cargar evaluaciones', error);
+        this.alertsService.alertError(
+          'No se pudieron cargar las evaluaciones integrales. Por favor, inténtelo de nuevo.',
+          'Error al cargar evaluaciones'
+        );
+      }
     });
   }
 
@@ -89,26 +99,31 @@ export class EvaluacionIntegralComponent implements OnInit {
       }
     });
   }
-
   guardarEvaluacion(): void {
     if (this.evaluacionForm.invalid) {
       this.evaluacionForm.markAllAsTouched();
+      this.alertsService.alertInfo('Por favor complete todos los campos requeridos correctamente', 'Formulario incompleto');
       return;
     }
 
     const data = this.evaluacionForm.value;
 
-    if (this.isEditMode) {
-      this.service.actualizarEvaluacion(this.evaluacionSeleccionada.id!, data).subscribe(() => {
+    this.service.guardarEvaluacion(data).subscribe({
+      next: () => {
+        this.alertsService.alertSuccess('La evaluación integral ha sido guardada correctamente', 'Evaluación guardada');
         this.cerrarModal();
         this.obtenerEvaluaciones();
-      });
-    } else {
-      this.service.guardarEvaluacion(data).subscribe(() => {
-        this.cerrarModal();
-        this.obtenerEvaluaciones();
-      });
-    }
+      },
+      error: (error) => {
+        console.error('Error al guardar evaluación', error);
+        this.alertsService.alertError(
+          'No se pudo guardar la evaluación integral. Por favor, inténtelo de nuevo.',
+          'Error al guardar'
+        );
+        this.evaluacionForm.enable();
+        this.isLoading = false;
+      }
+    });
   }
   
 
@@ -118,17 +133,25 @@ export class EvaluacionIntegralComponent implements OnInit {
     this.isEditMode = true;
     this.modalVisible = true;
   }
-
-  eliminarEvaluacion(id: number): void {
-    if (confirm('¿Deseas eliminar esta evaluación integral?')) {
-      this.service.eliminarEvaluacion(id).subscribe({
-        next: () => {
-          this.alertsService.toast('Evaluación eliminada correctamente.',  'success');
-          this.obtenerEvaluaciones();
-        },
-        error: () => this.alertsService.toast('Error al eliminar la evaluación.', 'error')
-      });
+  async eliminarEvaluacion(id: number): Promise<void> {
+    const confirmacion = await this.alertsService.showConfirmationDialog('Sí, eliminar evaluación');
+    if (!confirmacion) {
+      return;
     }
+
+    this.service.eliminarEvaluacion(id).subscribe({
+      next: () => {
+        this.alertsService.alertSuccess('La evaluación integral ha sido eliminada correctamente', 'Evaluación eliminada');
+        this.obtenerEvaluaciones();
+      },
+      error: (error) => {
+        console.error('Error al eliminar evaluación', error);
+        this.alertsService.alertError(
+          'No se pudo eliminar la evaluación integral. Por favor, inténtelo de nuevo.',
+          'Error al eliminar'
+        );
+      }
+    });
   }
 
   abrirModal(): void {

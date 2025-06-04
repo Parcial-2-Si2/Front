@@ -9,6 +9,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxPaginationModule } from 'ngx-pagination';
+import { AlertsService } from '../../../shared/services/alerts.service';
+import { ValidatorsService } from '../../../shared/services/validators.service';
 
 @Component({
   selector: 'app-inscripciones',
@@ -32,12 +34,13 @@ export class InscripcionComponent implements OnInit {
   page = 1;
   limit = 10;
   searchTerm = '';
-
   constructor(
     private inscripcionService: InscripcionService,
     private cursoService: CursoService,
     private estudianteService: EstudianteService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private alertsService: AlertsService,
+    private validatorsService: ValidatorsService
   ) {}
 
   ngOnInit(): void {
@@ -51,42 +54,57 @@ export class InscripcionComponent implements OnInit {
     this.obtenerInscripciones();
     this.obtenerCursos();
     this.obtenerEstudiantes();
-  }
-  obtenerInscripciones(): void {
+  }  obtenerInscripciones(): void {
     this.inscripcionService.obtenerInscripciones().subscribe({
       next: (data) => {
         this.inscripciones = data;
         this.inscripcionesFiltradas = [...data];
       },
-      error: () => console.error('Error al obtener inscripciones')
+      error: (error) => {
+        console.error('Error al obtener inscripciones:', error);
+        this.alertsService.toast('Error al cargar inscripciones', 'error');
+      }
     });
   }
 
   obtenerCursos(): void {
     this.cursoService.obtenerCursos().subscribe({
       next: (data) => this.cursos = data,
-      error: () => console.error('Error al obtener cursos')
+      error: (error) => {
+        console.error('Error al obtener cursos:', error);
+        this.alertsService.toast('Error al cargar cursos', 'error');
+      }
     });
   }
 
   obtenerEstudiantes(): void {
     this.estudianteService.obtenerEstudiantes().subscribe({
       next: (data) => this.estudiantes = data,
-      error: () => console.error('Error al obtener estudiantes')
+      error: (error) => {
+        console.error('Error al obtener estudiantes:', error);
+        this.alertsService.toast('Error al cargar estudiantes', 'error');
+      }
     });
   }
-
   guardarInscripcion(): void {
-    if (this.inscripcionForm.invalid) return;
+    if (this.inscripcionForm.invalid) {
+      this.inscripcionForm.markAllAsTouched();
+      this.alertsService.toast('Por favor complete todos los campos requeridos', 'warning');
+      return;
+    }
 
     const nuevaInscripcion: Inscripcion = this.inscripcionForm.value;
 
     this.inscripcionService.guardarInscripcion(nuevaInscripcion).subscribe({
       next: () => {
+        this.alertsService.toast('Inscripción guardada exitosamente', 'success');
         this.obtenerInscripciones();
         this.cerrarModal();
       },
-      error: () => console.error('Error al guardar inscripción')
+      error: (error) => {
+        console.error('Error al guardar inscripción:', error);
+        this.alertsService.toast('Error al guardar la inscripción', 'error');
+      }
     });
   }
 
@@ -96,18 +114,25 @@ export class InscripcionComponent implements OnInit {
     this.modalVisible = true;
     this.inscripcionForm.patchValue(inscripcion);
   }
-
   actualizarInscripcion(): void {
-    if (this.inscripcionForm.invalid) return;
+    if (this.inscripcionForm.invalid) {
+      this.inscripcionForm.markAllAsTouched();
+      this.alertsService.toast('Por favor complete todos los campos requeridos', 'warning');
+      return;
+    }
 
     const datosActualizados: Inscripcion = this.inscripcionForm.value;
 
     this.inscripcionService.actualizarInscripcion(this.inscripcionSeleccionada.id!, datosActualizados).subscribe({
       next: () => {
+        this.alertsService.toast('Inscripción actualizada exitosamente', 'success');
         this.obtenerInscripciones();
         this.cerrarModal();
       },
-      error: () => console.error('Error al actualizar inscripción')
+      error: (error) => {
+        console.error('Error al actualizar inscripción:', error);
+        this.alertsService.toast('Error al actualizar la inscripción', 'error');
+      }
     });
   }
   verInscripcion(inscripcion: Inscripcion): void {
@@ -115,14 +140,16 @@ export class InscripcionComponent implements OnInit {
 
   let estudianteCargado = false;
   let cursoCargado = false;
-
   this.estudianteService.obtenerPorCI(inscripcion.estudiante_ci).subscribe({
     next: (estudiante) => {
       this.estudianteSeleccionado = estudiante;
       estudianteCargado = true;
       this.mostrarModalSiListo(estudianteCargado, cursoCargado);
     },
-    error: () => { console.error('Error al obtener los datos del estudiante'); }
+    error: (error) => {
+      console.error('Error al obtener los datos del estudiante:', error);
+      this.alertsService.toast('Error al cargar datos del estudiante', 'error');
+    }
   });
 
   this.cursoService.obtenerCursoPorId(inscripcion.curso_id).subscribe({
@@ -131,7 +158,10 @@ export class InscripcionComponent implements OnInit {
       cursoCargado = true;
       this.mostrarModalSiListo(estudianteCargado, cursoCargado);
     },
-    error: () => { console.error('Error al cargar curso'); }
+    error: (error) => {
+      console.error('Error al cargar curso:', error);
+      this.alertsService.toast('Error al cargar datos del curso', 'error');
+    }
   });
 }
 
@@ -142,11 +172,20 @@ mostrarModalSiListo(estudianteCargado: boolean, cursoCargado: boolean): void {
 }
 
 
-
   eliminarInscripcion(inscripcion: Inscripcion): void {
-    this.inscripcionService.eliminarInscripcion(inscripcion.id!).subscribe({
-      next: () => this.obtenerInscripciones(),
-      error: () => console.error('Error al eliminar inscripción')
+    this.alertsService.showConfirmationDialog().then((confirmed) => {
+      if (confirmed) {
+        this.inscripcionService.eliminarInscripcion(inscripcion.id!).subscribe({
+          next: () => {
+            this.alertsService.toast('Inscripción eliminada exitosamente', 'success');
+            this.obtenerInscripciones();
+          },
+          error: (error) => {
+            console.error('Error al eliminar inscripción:', error);
+            this.alertsService.toast('Error al eliminar la inscripción', 'error');
+          }
+        });
+      }
     });
   }
 
@@ -195,4 +234,12 @@ searchTable(event: any): void {
   this.page = 1;
 }
 
+  // Métodos de validación
+  isValidField(field: string): boolean | null {
+    return this.validatorsService.isValidField(this.inscripcionForm, field);
+  }
+
+  getMessageError(field: string): string | null {
+    return this.validatorsService.getErrorMessage(this.inscripcionForm, field);
+  }
 }

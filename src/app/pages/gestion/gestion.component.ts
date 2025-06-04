@@ -50,14 +50,22 @@ export class GestionComponent implements OnInit {
     });
     this.obtenerGestiones();
   }
-
   obtenerGestiones(): void {
     this.gestionService.obtenerGestiones().subscribe({
       next: (data) => {
         this.gestiones = data;
         this.todasLasGestiones = data;
+        if (data.length === 0) {
+          this.alertsService.alertInfo('No se encontraron gestiones registradas', 'Sin datos');
+        }
       },
-      error: (err) => this.alertsService.toast(err, 'error')
+      error: (error) => {
+        console.error('Error al cargar gestiones', error);
+        this.alertsService.alertError(
+          'No se pudieron cargar las gestiones. Por favor, inténtelo de nuevo.',
+          'Error al cargar gestiones'
+        );
+      }
     });
   }
 
@@ -84,10 +92,10 @@ export class GestionComponent implements OnInit {
     this.isEditMode = false;
     this.gestionForm.reset();
   }
-
   guardarGestion(): void {
     if (this.gestionForm.invalid) {
       this.gestionForm.markAllAsTouched();
+      this.alertsService.alertInfo('Por favor complete todos los campos requeridos correctamente', 'Formulario incompleto');
       return;
     }
 
@@ -95,11 +103,17 @@ export class GestionComponent implements OnInit {
 
     this.gestionService.guardarGestion(nuevaGestion).subscribe({
       next: () => {
-        this.alertsService.toast('Gestión guardada con éxito', 'success');
+        this.alertsService.alertSuccess('La gestión ha sido guardada correctamente', 'Gestión guardada');
         this.obtenerGestiones();
         this.cerrarModal();
       },
-      error: (err: any) => this.alertsService.toast(err, 'error')
+      error: (error) => {
+        console.error('Error al guardar gestión', error);
+        this.alertsService.alertError(
+          'No se pudo guardar la gestión. Por favor, inténtelo de nuevo.',
+          'Error al guardar'
+        );
+      }
     });
   }
 
@@ -109,35 +123,47 @@ export class GestionComponent implements OnInit {
     this.modalVisible = true;
     this.gestionForm.patchValue(gestion);
   }
-
   actualizarGestion(): void {
     if (this.gestionForm.invalid || !this.gestionSeleccionada?.id) {
       this.gestionForm.markAllAsTouched();
+      this.alertsService.alertInfo('Por favor complete todos los campos requeridos correctamente', 'Formulario incompleto');
       return;
     }
 
     const gestionActualizada: Gestion = this.gestionForm.value;
     this.gestionService.actualizarGestion(this.gestionSeleccionada.id, gestionActualizada).subscribe({
       next: () => {
-        this.alertsService.toast('Gestión actualizada con éxito', 'success');
+        this.alertsService.alertSuccess('La gestión ha sido actualizada correctamente', 'Gestión actualizada');
         this.obtenerGestiones();
         this.cerrarModal();
       },
-      error: (err) => this.alertsService.toast(err, 'error')
+      error: (error) => {
+        console.error('Error al actualizar gestión', error);
+        this.alertsService.alertError(
+          'No se pudo actualizar la gestión. Por favor, inténtelo de nuevo.',
+          'Error al actualizar'
+        );
+      }
     });
   }
+  async eliminarGestion(gestion: Gestion): Promise<void> {
+    const confirmacion = await this.alertsService.showConfirmationDialog('Sí, eliminar gestión');
+    if (!confirmacion) {
+      return;
+    }
 
-  eliminarGestion(gestion: Gestion): void {
-    this.alertsService.showConfirmationDialog().then((confirmed) => {
-      if (confirmed) {
-        this.gestionService.eliminarGestion(gestion.id!).subscribe({
-          next: () => {
-            this.obtenerGestiones();
-            this.alertsService.toast('Gestión eliminada correctamente', 'success');
-            this.page = 1;
-          },
-          error: (err) => this.alertsService.toast(err, 'error')
-        });
+    this.gestionService.eliminarGestion(gestion.id!).subscribe({
+      next: () => {
+        this.alertsService.alertSuccess('La gestión ha sido eliminada correctamente', 'Gestión eliminada');
+        this.obtenerGestiones();
+        this.page = 1;
+      },
+      error: (error) => {
+        console.error('Error al eliminar gestión', error);
+        this.alertsService.alertError(
+          'No se pudo eliminar la gestión. Por favor, inténtelo de nuevo.',
+          'Error al eliminar'
+        );
       }
     });
   }

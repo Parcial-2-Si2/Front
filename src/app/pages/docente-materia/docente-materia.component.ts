@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { DocenteService } from '../docente/services/docentes.service';
 import { CommonModule } from '@angular/common'; 
 import { MateriaCurso } from '../materia-curso/interfaces/materiaCurso.interface';
+import { AlertsService } from '../../../shared/services/alerts.service';
 
 @Component({
   selector: 'app-docente-detalle',
@@ -21,30 +22,33 @@ export class DocenteMateriaComponent implements OnInit {
   docenteSeleccionado!: Docente;
   docenteCI!: number;  materiasAsignadas: DocenteMateria[] = [];
   todasLasMaterias: Materia[] = [];
-  materiaSeleccionadaId: number | null = null;
-  editando = false;
-  alertsService: any;
+  materiaSeleccionadaId: number | null = null;  editando = false;
+  
   constructor(
   private route: ActivatedRoute,
   private router: Router,
   private dmService: DocenteMateriaService,
   private materiaService: MateriaService,
-  private docenteService: DocenteService
-  ) {}  ngOnInit(): void {
+  private docenteService: DocenteService,
+  private alertsService: AlertsService
+  ) {}ngOnInit(): void {
   this.docenteCI = Number(this.route.snapshot.paramMap.get('ci')); // ← obtiene el CI del parámetro de la ruta
   console.log('🔵 CI del docente seleccionado:', this.docenteCI);
   this.obtenerDocente();
   this.obtenerMaterias();
   this.obtenerAsignacionesPorDocente();
-}
-  obtenerMaterias(): void {
+}  obtenerMaterias(): void {
     this.materiaService.obtenerMaterias().subscribe({
       next: (materias) => {
         this.todasLasMaterias = materias;
         console.log('📚 Total de materias disponibles:', this.todasLasMaterias.length);
       },
-      error: () => {
-        console.error('Error al cargar materias');
+      error: (error) => {
+        console.error('Error al cargar materias', error);
+        this.alertsService.alertError(
+          'No se pudieron cargar las materias disponibles. Por favor, inténtelo de nuevo.',
+          'Error al cargar materias'
+        );
       }
     });
   }
@@ -57,14 +61,17 @@ export class DocenteMateriaComponent implements OnInit {
     const idsAsignados = this.materiasAsignadas.map(asignacion => asignacion.materia_id);
     return this.todasLasMaterias.filter(materia => !idsAsignados.includes(materia.id!));
   }
-
   obtenerDocente(): void {
   this.docenteService.obtenerDocentePorCI(this.docenteCI).subscribe({
     next: (docente) => {
       this.docenteSeleccionado = docente;
     },
-    error: () => {
-      console.error('Error al obtener los datos del docente');
+    error: (error) => {
+      console.error('Error al obtener los datos del docente', error);
+      this.alertsService.alertError(
+        'No se pudieron cargar los datos del docente. Por favor, inténtelo de nuevo.',
+        'Error al cargar docente'
+      );
     }
   });
 }  obtenerAsignacionesPorDocente(): void {
@@ -74,13 +81,19 @@ export class DocenteMateriaComponent implements OnInit {
       console.log('🟢 Materias asignadas cargadas:', this.materiasAsignadas);
       console.log('🟢 IDs de asignaciones:', this.materiasAsignadas.map(a => ({id: a.id, materia_id: a.materia_id})));
     },
-    error: (err) => {
-      console.error('❌ Error cargando asignaciones:', err);
+    error: (error) => {
+      console.error('❌ Error cargando asignaciones:', error);
+      this.alertsService.alertError(
+        'No se pudieron cargar las asignaciones del docente. Por favor, inténtelo de nuevo.',
+        'Error al cargar asignaciones'
+      );
     }
   });
-}
- asignarMateria(): void {
-  if (!this.materiaSeleccionadaId) return;
+} asignarMateria(): void {
+  if (!this.materiaSeleccionadaId) {
+    this.alertsService.alertInfo('Por favor seleccione una materia para asignar', 'Materia no seleccionada');
+    return;
+  }
 
  const asignacion: DocenteMateria = {
   docente_ci: Number(this.docenteCI), // ← aseguramos que sea number
@@ -95,20 +108,25 @@ export class DocenteMateriaComponent implements OnInit {
   this.dmService.guardarAsignacion(asignacion).subscribe({
     next: () => {
       console.log('✅ Asignación guardada exitosamente');
+      this.alertsService.alertSuccess('La materia ha sido asignada correctamente al docente', 'Materia asignada');
       this.obtenerAsignacionesPorDocente();
       this.materiaSeleccionadaId = null;
     },
-    error: (err) => {
-      console.error('❌ Error al asignar materia:', err);
+    error: (error) => {
+      console.error('❌ Error al asignar materia:', error);
+      this.alertsService.alertError(
+        'No se pudo asignar la materia al docente. Por favor, inténtelo de nuevo.',
+        'Error al asignar materia'
+      );
     }
   });
 }
-
-  eliminarAsignacion(id: number): void {
+  async eliminarAsignacion(id: number): Promise<void> {
     console.log('🔴 Intentando eliminar asignación con ID:', id);
     
     if (!id) {
       console.error('❌ ID de asignación no válido:', id);
+      this.alertsService.alertInfo('ID de asignación no válido', 'Error de validación');
       return;
     }
 
@@ -116,18 +134,25 @@ export class DocenteMateriaComponent implements OnInit {
     const asignacion = this.materiasAsignadas.find(a => a.id === id);
     const nombreMateria = asignacion ? this.obtenerNombreMateria(asignacion.materia_id) : 'Desconocida';
     
-    if (confirm(`¿Está seguro de que desea eliminar la asignación de la materia "${nombreMateria}"?`)) {
-      this.dmService.eliminarAsignacion(id).subscribe({
-        next: () => {
-          console.log('✅ Asignación eliminada exitosamente');
-          this.obtenerAsignacionesPorDocente();
-        },
-        error: (err) => {
-          console.error('❌ Error al eliminar asignación:', err);
-          alert('Error al eliminar la asignación. Por favor, inténtelo de nuevo.');
-        }
-      });
+    const confirmacion = await this.alertsService.showConfirmationDialog(`Sí, eliminar asignación de "${nombreMateria}"`);
+    if (!confirmacion) {
+      return;
     }
+
+    this.dmService.eliminarAsignacion(id).subscribe({
+      next: () => {
+        console.log('✅ Asignación eliminada exitosamente');
+        this.alertsService.alertSuccess('La asignación ha sido eliminada correctamente', 'Asignación eliminada');
+        this.obtenerAsignacionesPorDocente();
+      },
+      error: (error) => {
+        console.error('❌ Error al eliminar asignación:', error);
+        this.alertsService.alertError(
+          'No se pudo eliminar la asignación. Por favor, inténtelo de nuevo.',
+          'Error al eliminar asignación'
+        );
+      }
+    });
   }
 
   volver(): void {

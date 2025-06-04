@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { NavigationService } from '../../../shared/services/navigation.service';
+import { AlertsService } from '../../../shared/services/alerts.service';
 
 @Component({
   selector: 'app-materia-curso',
@@ -34,16 +35,15 @@ export class MateriaCursoComponent implements OnInit {
   page = 1;
   limit = 10;
   searchTerm = '';
-
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private materiaCursoService: MateriaCursoService,
     private materiaService: MateriaService,
     private cursoService: CursoService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private alertsService: AlertsService
   ) {}
-
   ngOnInit(): void {
     this.cursoId = Number(this.route.snapshot.paramMap.get('id'));
     this.isDocente = this.navigationService.getUsuario()?.esDocente || false;
@@ -54,31 +54,40 @@ export class MateriaCursoComponent implements OnInit {
         this.todasLasMaterias = materias;
         this.obtenerAsignaciones(); // se ejecuta solo cuando ya tenemos las materias
       },
-      error: () => {
-        console.error('Error al obtener materias');
+      error: (error) => {
+        console.error('Error al obtener materias', error);
+        this.alertsService.alertError(
+          'No se pudieron cargar las materias. Por favor, recargue la página.',
+          'Error de carga inicial'
+        );
       }
     });
-  }
-
-  obtenerCurso(): void {
+  }obtenerCurso(): void {
     this.cursoService.obtenerCursoPorId(this.cursoId).subscribe({
       next: (curso) => {
         this.cursoSeleccionado = curso;
       },
-      error: () => {
-        console.error('Error al cargar curso');
+      error: (error) => {
+        console.error('Error al cargar curso', error);
+        this.alertsService.alertError(
+          'No se pudo cargar la información del curso. Por favor, inténtelo de nuevo.',
+          'Error al cargar curso'
+        );
       }
     });
   }
-
   obtenerMaterias(): void {
     this.materiaService.obtenerMaterias().subscribe({
       next: (materias) => {
         this.todasLasMaterias = materias;
         this.actualizarMateriasDisponibles();
       },
-      error: () => {
-        console.error('Error al cargar materias');
+      error: (error) => {
+        console.error('Error al cargar materias', error);
+        this.alertsService.alertError(
+          'No se pudieron cargar las materias disponibles. Por favor, inténtelo de nuevo.',
+          'Error al cargar materias'
+        );
       }
     });
   }
@@ -89,7 +98,6 @@ export class MateriaCursoComponent implements OnInit {
   this.todasLasMaterias = this.todasLasMaterias
     .filter(m => typeof m.id === 'number' && !idsAsignados.includes(m.id));
 }
-
 
   obtenerAsignaciones(): void {
     this.materiaCursoService.obtenerAsignaciones().subscribe({
@@ -102,14 +110,20 @@ export class MateriaCursoComponent implements OnInit {
         this.materiasAsignadasFiltradas = [...this.materiasAsignadas];
         this.actualizarMateriasDisponibles();
       },
-      error: () => {
-        console.error('Error al obtener asignaciones');
+      error: (error) => {
+        console.error('Error al obtener asignaciones', error);
+        this.alertsService.alertError(
+          'No se pudieron cargar las asignaciones de materias. Por favor, inténtelo de nuevo.',
+          'Error al cargar asignaciones'
+        );
       }
     });
   }
-
   asignarMateria(): void {
-    if (!this.materiaSeleccionadaId) return;
+    if (!this.materiaSeleccionadaId) {
+      this.alertsService.alertInfo('Por favor seleccione una materia para asignar', 'Materia no seleccionada');
+      return;
+    }
 
     const asignacion = {
       curso_id: this.cursoId,
@@ -119,21 +133,42 @@ export class MateriaCursoComponent implements OnInit {
 
     this.materiaCursoService.guardarAsignacion(asignacion).subscribe({
       next: () => {
+        this.alertsService.alertSuccess('La materia ha sido asignada correctamente al curso', 'Materia asignada');
         this.obtenerAsignaciones();
         this.materiaSeleccionadaId = null;
       },
-      error: () => {
-        console.error('Error al asignar materia');
+      error: (error) => {
+        console.error('Error al asignar materia', error);
+        this.alertsService.alertError(
+          'No se pudo asignar la materia al curso. Por favor, inténtelo de nuevo.',
+          'Error al asignar materia'
+        );
       }
     });
   }
+  async eliminarAsignacion(id?: number): Promise<void> {
+    if (!id) {
+      this.alertsService.alertInfo('ID de asignación no válido', 'Error de validación');
+      return;
+    }
 
-  eliminarAsignacion(id?: number): void {
-    if (!id) return;
+    const confirmacion = await this.alertsService.showConfirmationDialog('Sí, eliminar asignación');
+    if (!confirmacion) {
+      return;
+    }
 
     this.materiaCursoService.eliminarAsignacion(id).subscribe({
-      next: () => this.obtenerAsignaciones(),
-      error: () => console.error('Error al eliminar asignación'),
+      next: () => {
+        this.alertsService.alertSuccess('La asignación ha sido eliminada correctamente', 'Asignación eliminada');
+        this.obtenerAsignaciones();
+      },
+      error: (error) => {
+        console.error('Error al eliminar asignación', error);
+        this.alertsService.alertError(
+          'No se pudo eliminar la asignación. Por favor, inténtelo de nuevo.',
+          'Error al eliminar asignación'
+        );
+      }
     });
   }
 

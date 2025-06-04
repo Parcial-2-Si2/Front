@@ -11,6 +11,7 @@ import { Materia } from '../materia/interfaces/materia.interfaces';
 import { Estudiante } from '../estudiante/interfaces/estudiante.interface';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { forkJoin } from 'rxjs';
+import { AlertsService } from '../../../shared/services/alerts.service';
 
 @Component({
   selector: 'app-evaluacion-list',
@@ -23,6 +24,7 @@ export class EvaluacionComponent {
   private gestionService = inject(GestionService);
   private materiaService = inject(MateriaService);
   private estudianteService = inject(EstudianteService);
+  private alertsService = inject(AlertsService);
 
   evaluaciones: EvaluacionDetallada[] = [];
   evaluacionesFiltradas: EvaluacionDetallada[] = [];
@@ -72,15 +74,20 @@ export class EvaluacionComponent {
         this.evaluacionesFiltradas = [...this.evaluaciones];
         
         this.cargando = false;
+        
+        if (this.evaluaciones.length === 0) {
+          this.alertsService.toast('No se encontraron evaluaciones', 'info');
+        }
       },
       error: (error) => {
         console.error('Error al cargar datos:', error);
+        this.alertsService.toast('Error al cargar los datos. Mostrando datos de prueba.', 'warning');
         // Cargar datos de prueba como fallback
         this.cargarDatosPrueba();
         this.cargando = false;
       }
     });
-  }  private procesarEvaluacion(evaluacion: Evaluacion): EvaluacionDetallada {
+  }private procesarEvaluacion(evaluacion: Evaluacion): EvaluacionDetallada {
     // Búsqueda robusta del estudiante (maneja diferentes tipos de datos)
     const estudiante = this.estudiantes.find(e => 
       e.ci === evaluacion.estudiante_ci || 
