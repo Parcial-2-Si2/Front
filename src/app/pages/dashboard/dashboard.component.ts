@@ -34,12 +34,15 @@ export class DashboardComponent implements OnInit {
   estadisticasAdmin: EstadisticasGlobales | null = null;
   tarjetasAdmin: TarjetaAcceso[] = [];
   cargandoDatos = false;
+  
   constructor(
     private dashboardService: DashboardService,
     private alertsService: AlertsService,
     private authService: AuthService,
     public navigationService: NavigationService
-  ) {}  ngOnInit(): void {    
+  ) {}
+
+  ngOnInit(): void {    
     // *** DATOS DE PRUEBA TEMPORALES ***
     // Simular un token y usuario para pruebas cuando no hay usuario autenticado
     if (!localStorage.getItem('auth_token')) {
@@ -84,7 +87,9 @@ export class DashboardComponent implements OnInit {
       { titulo: 'Evaluaciones', descripcion: 'Ver todas las evaluaciones', icono: 'bi bi-clipboard-check', link: '/dashboard/evaluacion', color: 'secondary' },
       { titulo: 'Boletines', descripcion: 'Generar y consultar boletines', icono: 'bi bi-file-earmark-text', link: '/dashboard/boletines', color: 'dark' }
     ];
-  }  cargarDatosDashboard(): void {
+  }
+
+  cargarDatosDashboard(): void {
     this.cargandoDatos = true;
 
     if (this.esDocente && this.ciDocente) {
@@ -95,6 +100,7 @@ export class DashboardComponent implements OnInit {
       this.cargarDatosAdmin();
     }
   }
+
   private cargarDatosDocente(): void {
     const ci = this.ciDocente!;
     console.log('=== INICIANDO CARGA DE DATOS DEL DOCENTE ===');
@@ -142,6 +148,7 @@ export class DashboardComponent implements OnInit {
       }
     });
   }
+
   private cargarDatosAdmin(): void {
     console.log('=== INICIANDO CARGA DE DATOS DEL ADMINISTRADOR ===');
     
@@ -186,82 +193,126 @@ export class DashboardComponent implements OnInit {
   }
 
   private procesarDatosDocente(data: any): void {
-    // Procesar datos de estudiantes por curso
-    this.materiasAsignadas = data.estudiantes.cursos?.map((curso: any) => ({
-      id: curso.id || 0,
-      nombre: curso.materias_docente?.map((m: any) => m.nombre).join(', ') || 'Sin materias',
-      curso: {
-        id: curso.curso_id || 0,
-        nombre: curso.curso_info?.nombre || 'Curso sin nombre',
-        turno: curso.curso_info?.turno || 'Sin turno',
-        nivel: curso.curso_info?.nivel || ''
-      },
-      totalEstudiantes: curso.total_estudiantes || 0,
-      porcentajeAsistencia: 0, // Se actualizará con datos de asistencia
-      promedioNotas: 0, // Se actualizará con datos de notas
-      estudiantesTopRendimiento: [],
-      estudiantesBajoRendimiento: []
-    })) || [];
+    console.log('=== PROCESANDO DATOS DEL DOCENTE ===');
+    console.log('Datos recibidos:', data);
+    
+    // Limpiar array de materias
+    this.materiasAsignadas = [];
+    
+    // Procesar cada curso y crear una entrada por materia
+    if (data.estudiantes.cursos && Array.isArray(data.estudiantes.cursos)) {
+      data.estudiantes.cursos.forEach((curso: any) => {
+        if (curso.materias_docente && Array.isArray(curso.materias_docente)) {
+          // Crear una entrada por cada materia del curso
+          curso.materias_docente.forEach((materia: any) => {
+            const materiaAsignada = {
+              id: materia.id || 0,
+              nombre: materia.nombre || 'Materia sin nombre',
+              curso: {
+                id: curso.curso_id || 0,
+                nombre: curso.curso_info?.nombre || 'Curso sin nombre',
+                turno: curso.curso_info?.turno || 'Sin turno',
+                nivel: curso.curso_info?.nivel || 'Sin nivel'
+              },
+              totalEstudiantes: curso.total_estudiantes || 0,
+              porcentajeAsistencia: 0, // Se actualizará con datos de asistencia
+              promedioNotas: 0, // Se actualizará con datos de notas
+              estudiantesTopRendimiento: [],
+              estudiantesBajoRendimiento: []
+            };
+            
+            this.materiasAsignadas.push(materiaAsignada);
+          });
+        }
+      });
+    }
+
+    console.log('Materias procesadas:', this.materiasAsignadas);
 
     // Mapear datos de asistencia a las materias
-    if (data.asistencia.materias) {
+    if (data.asistencia?.materias && Array.isArray(data.asistencia.materias)) {
       data.asistencia.materias.forEach((materia: any) => {
         const materiaEncontrada = this.materiasAsignadas.find(m => 
-          m.nombre.includes(materia.materia_nombre)
+          m.nombre === materia.materia_nombre || m.nombre.includes(materia.materia_nombre)
         );
         if (materiaEncontrada) {
-          materiaEncontrada.porcentajeAsistencia = materia.promedio_asistencia || 0;
+          materiaEncontrada.porcentajeAsistencia = Math.round(materia.promedio_asistencia * 100) / 100;
+          console.log(`Asistencia actualizada para ${materiaEncontrada.nombre}: ${materiaEncontrada.porcentajeAsistencia}%`);
+        } else {
+          console.warn(`No se encontró materia para asistencia:`, materia.materia_nombre);
         }
       });
     }
 
     // Mapear datos de notas a las materias
-    if (data.notas.materias) {
+    if (data.notas?.materias && Array.isArray(data.notas.materias)) {
       data.notas.materias.forEach((materia: any) => {
-        const materiaEncontrada = this.materiasAsignadas.find(m => 
-          m.nombre.includes(materia.materia_nombre)
+        const materiaEncontrada = this.materiasAsignadas.find(m =>
+          m.nombre === materia.materia_nombre || m.nombre.includes(materia.materia_nombre)
         );
         if (materiaEncontrada) {
-          materiaEncontrada.promedioNotas = materia.promedio_notas || 0;
+          materiaEncontrada.promedioNotas = Math.round(materia.promedio_notas * 100) / 100;
+          console.log(`Notas actualizadas para ${materiaEncontrada.nombre}: ${materiaEncontrada.promedioNotas}`);
+        } else {
+          console.warn(`No se encontró materia para notas:`, materia.materia_nombre);
         }
       });
     }
 
     // Mapear mejores y peores estudiantes
-    if (data.mejoresPeores.materias) {
+    if (data.mejoresPeores?.materias && Array.isArray(data.mejoresPeores.materias)) {
       data.mejoresPeores.materias.forEach((materia: any) => {
         const materiaEncontrada = this.materiasAsignadas.find(m => 
-          m.nombre.includes(materia.materia_nombre)
+          m.nombre === materia.materia_nombre || m.nombre.includes(materia.materia_nombre)
         );
         if (materiaEncontrada) {
           materiaEncontrada.estudiantesTopRendimiento = materia.mejores_estudiantes?.map((est: any) => ({
             nombre: est.nombre_completo || est.nombre || 'Sin nombre',
             ci: est.ci || 'Sin CI',
-            promedio: est.promedio || 0,
-            porcentajeAsistencia: est.porcentaje_asistencia || 0
+            promedio: Math.round((est.promedio || 0) * 100) / 100,
+            porcentajeAsistencia: Math.round((est.porcentaje_asistencia || 0) * 100) / 100
           })) || [];
           
           materiaEncontrada.estudiantesBajoRendimiento = materia.peores_estudiantes?.map((est: any) => ({
             nombre: est.nombre_completo || est.nombre || 'Sin nombre',
             ci: est.ci || 'Sin CI',
-            promedio: est.promedio || 0,
-            porcentajeAsistencia: est.porcentaje_asistencia || 0
+            promedio: Math.round((est.promedio || 0) * 100) / 100,
+            porcentajeAsistencia: Math.round((est.porcentaje_asistencia || 0) * 100) / 100
           })) || [];
+          
+          console.log(`Estudiantes actualizados para ${materiaEncontrada.nombre}`);
+        } else {
+          console.warn(`No se encontró materia para estudiantes:`, materia.materia_nombre);
         }
       });
     }
 
-    // Establecer estadísticas generales del docente
+    // Crear estadísticas generales del docente
     this.estadisticasDocente = {
-      totalEstudiantes: data.estudiantes.resumen?.total_estudiantes || 0,
-      totalMaterias: data.estudiantes.resumen?.total_materias || 0,
-      promedioAsistenciaGeneral: data.asistencia.promedio_asistencia || 0,
-      promedioNotasGeneral: data.notas.promedio_general || 0,
-      evaluacionesRegistradas: data.evaluaciones?.total_evaluaciones || 0
+      totalEstudiantes: data.estudiantes.resumen?.total_estudiantes || 
+                       this.materiasAsignadas.reduce((sum, m) => sum + m.totalEstudiantes, 0),
+      totalMaterias: this.materiasAsignadas.length,
+      promedioAsistenciaGeneral: data.asistencia?.promedio_asistencia || 
+                                this.calcularPromedioGeneral('porcentajeAsistencia'),
+      promedioNotasGeneral: data.notas?.promedio_general || 
+                           this.calcularPromedioGeneral('promedioNotas'),
+      evaluacionesRegistradas: 0 // Se puede implementar más tarde
     };
 
     // Generar alertas basadas en los datos
     this.generarAlertasDocente();
+
+    console.log('=== DATOS PROCESADOS FINALES ===');
+    console.log('Materias asignadas:', this.materiasAsignadas);
+    console.log('Estadísticas del docente:', this.estadisticasDocente);
+  }
+
+  // Método auxiliar para calcular promedios generales
+  private calcularPromedioGeneral(campo: 'porcentajeAsistencia' | 'promedioNotas'): number {
+    if (this.materiasAsignadas.length === 0) return 0;
+    
+    const total = this.materiasAsignadas.reduce((sum, materia) => sum + (materia[campo] || 0), 0);
+    return Math.round((total / this.materiasAsignadas.length) * 100) / 100;
   }
 
   private procesarDatosAdmin(data: any): void {
@@ -309,7 +360,8 @@ export class DashboardComponent implements OnInit {
             descripcion: `Promedio de ${estudiante.promedio} en ${materia.nombre}`,
             prioridad: 'alta'
           });
-        }      });
+        }
+      });
     });
   }
 
