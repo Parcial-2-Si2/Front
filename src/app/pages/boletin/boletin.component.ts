@@ -122,14 +122,14 @@ export class BoletinComponent {
 
       materia.periodos.forEach((periodo: any) => {
         const claveFinal = `${periodo.anio} - ${periodo.periodo} (Final)`;
-        const claveEstimada = `${periodo.anio} - ${periodo.periodo} (Estimada)`;
+        //const claveEstimada = `${periodo.anio} - ${periodo.periodo} (Estimada)`;
 
         // Asignar valores numéricos directamente o null si no existen
         fila[claveFinal] = periodo.nota_final?.valor !== undefined ? periodo.nota_final.valor : null;
-        fila[claveEstimada] = periodo.nota_estimada?.valor !== undefined ? periodo.nota_estimada.valor : null;
+       // fila[claveEstimada] = periodo.nota_estimada?.valor !== undefined ? periodo.nota_estimada.valor : null;
 
         columnasSet.add(claveFinal);
-        columnasSet.add(claveEstimada);
+       // columnasSet.add(claveEstimada);
       });
 
       materiasProcesadas.push(fila);
